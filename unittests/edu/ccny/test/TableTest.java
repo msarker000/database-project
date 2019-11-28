@@ -25,7 +25,6 @@ public class TableTest {
 		departmentTable.addKey(deptkey);
 		departmentTable.addConstrain(new Constraint('N', Operator.NOT_EQUAL, null));
 		
-		
 		//
 		departmentTable.insert("CSE","1001");
 		departmentTable.insert("DSE","1002");

@@ -8,6 +8,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.omg.CORBA.portable.ValueInputStream;
+
 /**
  * This class present table in with all kind if operation insert, update, delete
  * 
@@ -46,6 +48,10 @@ public class Table {
 		this.foreignKey = foreignKey;
 		this.foreignKey.getTable().addTableDependOnMe(this);
 	}
+	
+	public ForeignKey getForeignKey() {
+		return foreignKey;
+	}
 
 	public void addTableDependOnMe(Table table) {
 		this.tablesDependOnMe.add(table);
@@ -65,6 +71,12 @@ public class Table {
 		constraints.put(constraint.getAttribute(), constraintList);
 	}
 
+	/**
+	 * insert values into table
+	 * 
+	 * @param values, the values to be inserted
+	 * 
+	 */
 	public void insert(String... values) {
 		if (values.length != columns.size()) {
 			System.err.println(String.format("Failed to insert into [%s]. Please check your values", name));
@@ -112,6 +124,32 @@ public class Table {
 		}
 
 		tuples.put(newTuple.getKeyValue(), newTuple);
+	}
+	
+	/**
+	 * finds tuple that matched the key value
+	 * 
+	 * @param key
+	 * @return
+	 */
+	
+	public Tuple getTuple(String key){
+		return tuples.get(key);
+		
+	}
+	
+	/**
+	 * finds the tuple that matches the column and value
+	 * 
+	 * @param column the column to be matched
+	 * @param value the value to be matched
+	 * @return
+	 */
+	public Tuple getTuple(Column column, String value){
+		
+		return tuples.values().stream().filter(tupe->tupe.getValue(column).equals(value))
+						.findFirst()
+						.orElse(null);
 	}
 
 	/**

@@ -2,26 +2,23 @@ package edu.ccny.test;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.junit.Test;
 
 import edu.ccny.db.project.Constraint;
-import edu.ccny.db.project.Database;
+import edu.ccny.db.project.DBOperator;
 import edu.ccny.db.project.Operator;
 import edu.ccny.db.project.Table;
 import edu.ccny.db.project.Tuple;
 
-public class DatabaseGroupByTest {
+public class DBOperatoreGroupByTest {
 
 	@Test
-	public void test() {
+	public void testgroupBy() {
 		// student table
 		Table studentTable = new Table("Student");
 		studentTable.addColumn('N', "string"); // name
@@ -50,11 +47,11 @@ public class DatabaseGroupByTest {
 		studentTable.insert("Tony", "37", "115", "1002");
 		assertEquals(8, studentTable.getTuples().values().size());
 
-		Database database = new Database();
+		DBOperator database = new DBOperator();
 		database.addTable(studentTable);
 		Set<Character> groupByChars = new LinkedHashSet<>();
 		groupByChars.add('C');
-		Map<String, List<Tuple>> map = database.groupBy(studentTable, groupByChars); // group
+		Map<String, List<Tuple>> map = database.groupBy("Student", groupByChars); // group
 																			// by
 																			// department
 																			// code
@@ -64,11 +61,10 @@ public class DatabaseGroupByTest {
 		assertEquals(2,map.get("1002").size());
 		assertEquals(1,map.get("1003").size());
 		
-		
 		groupByChars.clear();
 		groupByChars.add('C');
 		groupByChars.add('A');
-	    map = database.groupBy(studentTable, groupByChars); // group
+	    map = database.groupBy("Student", groupByChars); // group
 															// by
 															// department
 															// code and Age

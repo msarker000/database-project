@@ -1,28 +1,25 @@
 package edu.ccny.test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.xml.crypto.Data;
-
 import org.junit.Test;
 
 import edu.ccny.db.project.Condition;
 import edu.ccny.db.project.Constraint;
-import edu.ccny.db.project.Database;
-import edu.ccny.db.project.ForeignKey;
+import edu.ccny.db.project.DBOperator;
 import edu.ccny.db.project.Operator;
 import edu.ccny.db.project.Table;
 import edu.ccny.db.project.Tuple;
 
-public class DatabaseTest {
+public class DBOperatorInsertSelectTest {
 
 	@Test
-	public void test() {
+	public void testInsertIntoTable() {
 		// student table
 		Table studentTable = new Table("Student");
 		studentTable.addColumn('N', "string"); // name
@@ -54,26 +51,24 @@ public class DatabaseTest {
 		conditions.add(new Condition('R', Operator.LESS_THAN, "130"));
 		//conditions.add(new Condition('N', Operator.NOT_EQUAL, "Ayub"));
 		
-		Database database = new Database();
-		database.addTable(studentTable);
-		List<Tuple> tuples =  database.select(studentTable, conditions, Database.LOGICAL.AND);
+		DBOperator dbOperator = new DBOperator();
+		dbOperator.addTable(studentTable);
+		Set<Tuple> tuples =  dbOperator.select("Student", conditions, DBOperator.LOGICAL.AND);
 		System.out.println(tuples);
 		
 		assertEquals(2, tuples.size());
 		
 		conditions.clear();
 		conditions.add(new Condition('N', Operator.NOT_EQUAL, "Ayub"));
-		tuples =  database.select(studentTable, conditions,  Database.LOGICAL.AND);
+		tuples =  dbOperator.select("Student", conditions,  DBOperator.LOGICAL.AND);
 		System.out.println(tuples);
 		assertEquals(4, tuples.size());
-		
-		
 		
 		conditions.clear();
 		conditions.add(new Condition('N', Operator.EQUAL, "Ayub"));
 		conditions.add(new Condition('N', Operator.EQUAL, "Tom"));
 		conditions.add(new Condition('N', Operator.EQUAL, "Tom2"));
-		tuples =  database.select(studentTable, conditions,  Database.LOGICAL.OR);
+		tuples =  dbOperator.select("Student", conditions,  DBOperator.LOGICAL.OR);
 		System.out.println(tuples);
 		assertEquals(3, tuples.size());
 		

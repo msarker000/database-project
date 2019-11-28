@@ -7,7 +7,6 @@ public class Column implements Cloneable {
 	private final Datatype type;
 	private String value;
   
-	
 	public Column(Character name, Datatype type) {
 		this.name = name;
 		this.type = type;

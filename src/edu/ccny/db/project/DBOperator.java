@@ -1,0 +1,370 @@
+package edu.ccny.db.project;
+
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import edu.ccny.db.assignment.SetUtil;
+
+public class DBOperator {
+
+	private Map<String, Table> tables = new HashMap<>();
+
+	public enum LOGICAL {
+		AND, OR
+	}
+
+	public void addTable(Table table) {
+		this.tables.put(table.getName().toLowerCase(), table);
+	}
+
+	/**
+	 * Selects tuples based on conditions and Logical AND or Condition
+	 * 
+	 * @param tableName
+	 *            the table name
+	 * @param conditions
+	 *            the list of condition
+	 * @param logicType
+	 *            the logic type AND or OR
+	 * 
+	 * @return list of tuples that satisfy the condition;
+	 */
+	public Set<Tuple> select(String tableName, List<Condition> conditions, LOGICAL logicType) {
+		Set<Tuple> tuples = null;
+		try {
+			Table table = tables.get(tableName.toLowerCase());
+
+			if (logicType == LOGICAL.AND) {
+				tuples = table.getTuples().values().stream().filter(tuple -> isSatisfyConditionAll(tuple, conditions))
+						.collect(Collectors.toSet());
+			} else if (logicType == LOGICAL.OR) {
+				tuples = table.getTuples().values().stream().filter(tuple -> isSatisfyConditionAny(tuple, conditions))
+						.collect(Collectors.toSet());
+			}
+		} catch (Exception ex) {
+			System.err.println(
+					String.format("Failed to execute SELECT operation on Table[%s]. Check your params", tableName));
+		}
+
+		return tuples;
+
+	}
+
+	private String getGroupingByKey(Tuple tuple, Set<Character> ch) {
+		return tuple.getValue(ch);
+	}
+
+	/**
+	 * Selects tuples with group
+	 * 
+	 * @param tableName
+	 *            the name of table
+	 * @param groupBy
+	 *            the list of column attribute
+	 * @return list of tuple with group
+	 */
+	public Map<String, List<Tuple>> groupBy(String tableName, Set<Character> groupBy) {
+		try {
+			Table table = tables.get(tableName.toLowerCase());
+
+			Map<String, List<Tuple>> map = table.getTuples().values().stream()
+					.collect(Collectors.groupingBy(p -> getGroupingByKey(p, groupBy), Collectors.toList()));
+			return map;
+		} catch (Exception ex) {
+			System.err.println(
+					String.format("Failed to execute GROUPBY operation on Table[%s]. Check your params", tableName));
+			return null;
+		}
+	}
+
+	/**
+	 * Selects tuples from two tables using Cross join
+	 * 
+	 * @param tableName1
+	 *            the first table name
+	 * @param tableName2
+	 *            the second table name
+	 * @return list of join tuple
+	 */
+	public Set<JoinTuple> crossJoin(String tableName1, String tableName2) {
+		Set<JoinTuple> joinTuples = new LinkedHashSet<>();
+		try {
+			Table table1 = tables.get(tableName1.toLowerCase());
+			Table table2 = tables.get(tableName2.toLowerCase());
+
+			Collection<Tuple> tuples1 = table1.getTuples().values();
+			Collection<Tuple> tuples2 = table2.getTuples().values();
+
+			for (Tuple tuple1 : tuples1) {
+				for (Tuple tuple2 : tuples2) {
+					JoinTuple joinTuple = new JoinTuple();
+					addTupleToCrossTuple(table1.getName(), tuple1, joinTuple);
+					addTupleToCrossTuple(table2.getName(), tuple2, joinTuple);
+					joinTuples.add(joinTuple);
+				}
+			}
+		} catch (Exception e) {
+			System.err.println(String.format(
+					"Failed to execute CROSS JOIN operation on Table1[%s] and Table2[%s]. Check your params",
+					tableName1, tableName2));
+		}
+
+		return joinTuples;
+	}
+
+	/**
+	 * Selects tuples from two tables using natural join
+	 * 
+	 * @param tableName1
+	 *            the first table name
+	 * @param tableName2
+	 *            the second table name
+	 * @return list of join tuple
+	 */
+	public Set<JoinTuple> naturalJoin(String tableName1, String tableName2) {
+		Set<JoinTuple> naturalJoinTuples = new LinkedHashSet<>();
+
+		try {
+			Table table1 = tables.get(tableName1.toLowerCase());
+			Table table2 = tables.get(tableName2.toLowerCase());
+
+			ForeignKey foreignKey1 = table1.getForeignKey();
+			if (foreignKey1 == null) {
+				System.err.println(
+						String.format("Failed to do NATURAL JOIN Table[%s] does not have any foreign key", tableName1));
+				return null;
+			}
+
+			Collection<Tuple> tuples1 = table1.getTuples().values();
+
+			for (Tuple tuple1 : tuples1) {
+				// value foreign value of the foreign key in first table
+				String foreingKeyValueInTuple1 = tuple1.getValue(foreignKey1.getKey());
+
+				// find the tuple that matches the value of the foreign key in
+				// table2
+				Tuple tuple2 = table2.getTuple(foreingKeyValueInTuple1);
+
+				JoinTuple joinTuple = new JoinTuple();
+				addTupleToCrossTuple(table1.getName(), tuple1, joinTuple);
+				if (tuple2 != null) {
+					addTupleToCrossTuple(table2.getName(), tuple2, joinTuple);
+					naturalJoinTuples.add(joinTuple);
+				}
+			}
+		} catch (Exception e) {
+			System.err.println(String.format(
+					"Failed to execute NATURAL JOIN operation on Table1[%s] and Table2[%s]. Check your params",
+					tableName1, tableName2));
+		}
+		return naturalJoinTuples;
+	}
+
+	/**
+	 * Selects tuples from two tables using join condition
+	 * 
+	 * @param tableName1
+	 *            the first table name
+	 * @param tableName2
+	 *            the second table name
+	 * @param joinCondition
+	 *            the joinCondition of two table
+	 * 
+	 * @return list of join tuple
+	 */
+	public Set<JoinTuple> join(String tableName1, String tableName2, JoinCondition joinCondition) {
+
+		Set<JoinTuple> joinTuples = new LinkedHashSet<>();
+
+		try {
+			Table table1 = tables.get(tableName1.toLowerCase());
+			Table table2 = tables.get(tableName2.toLowerCase());
+
+			Collection<Tuple> tuples1 = table1.getTuples().values();
+
+			for (Tuple tuple1 : tuples1) {
+				// find value of the join column of the first table
+				String valueOnFistTable = tuple1.getValue(joinCondition.getColumnOfFirstTable());
+
+				// find the tuple in the second table that matches the value of
+				// the
+				// first table and second table join column
+				Tuple tuple2 = table2.getTuple(joinCondition.getColumnOfSecondTable(), valueOnFistTable);
+
+				JoinTuple joinTuple = new JoinTuple();
+				addTupleToCrossTuple(table1.getName(), tuple1, joinTuple);
+				if (tuple2 != null) {
+					addTupleToCrossTuple(table2.getName(), tuple2, joinTuple);
+					joinTuples.add(joinTuple);
+				}
+			}
+		} catch (Exception e) {
+			System.err.println(
+					String.format("Failed to execute JOIN operation on Table1[%s] and Table2[%s]. Check your params",
+							tableName1, tableName2));
+
+		}
+		return joinTuples;
+	}
+
+	/**
+	 * finds union of two sets of tuple
+	 * 
+	 * @param tuples1
+	 *            the first set of tuples
+	 * @param tuples2
+	 *            the second set of tuples
+	 * 
+	 * @return set of tuple those are in either tables
+	 */
+	public Set<Tuple> union(Set<Tuple> tuples1, Set<Tuple> tuples2) {
+		try {
+			Set<Tuple> tuples = SetUtil.union(tuples1, tuples2);
+			return tuples;
+		} catch (Exception e) {
+			System.err.println("Failed to execute UION operation. Check your params");
+			return null;
+		}
+
+	}
+
+	/**
+	 * finds intersection of two sets of tuple
+	 * 
+	 * @param tuples1
+	 *            the first set of tuples
+	 * @param tuples2
+	 *            the second set of tuples
+	 * 
+	 * @return set of tuple those are in common in both table
+	 */
+	public Set<Tuple> intersection(Set<Tuple> tuples1, Set<Tuple> tuples2) {
+		try {
+			Set<Tuple> tuples = SetUtil.intersection(tuples1, tuples2);
+			return tuples;
+		} catch (Exception e) {
+			System.err.println("Failed to execute INTERSECTION operation. Check your params");
+			return null;
+		}
+	}
+
+	/**
+	 * finds difference of two sets of tuple
+	 * 
+	 * @param tuples1
+	 *            the first set of tuples
+	 * @param tuples2
+	 *            the second set of tuples
+	 * 
+	 * @return list of tuple those are in tuples1 but not in tuples2
+	 * 
+	 */
+	public Set<Tuple> difference(Set<Tuple> tuples1, Set<Tuple> tuples2) {
+		try {
+			Set<Tuple> tuples = SetUtil.difference(tuples1, tuples2);
+			return tuples;
+		} catch (Exception e) {
+			System.err.println("Failed to execute DIFFERENCE operation. Check your params");
+			return null;
+		}
+	}
+
+	private void addTupleToCrossTuple(String tableName, Tuple tuple, JoinTuple crossTuple) {
+		for (Column column : tuple.getValues().values()) {
+			String key = String.format("%s.%c", tableName, column.getName());
+			crossTuple.add(key, column);
+		}
+	}
+
+	private boolean isSatisfyConditionAll(Tuple tuple, List<Condition> conditions) {
+		for (Condition condition : conditions) {
+			Character ch = condition.getAttribute();
+			Column column = tuple.getColumn(ch);
+			if (!isSatisfyColumnValue(condition, column.getType(), column.getValue())) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	private boolean isSatisfyConditionAny(Tuple tuple, List<Condition> conditions) {
+		for (Condition condition : conditions) {
+			Character ch = condition.getAttribute();
+			Column column = tuple.getColumn(ch);
+			if (isSatisfyColumnValue(condition, column.getType(), column.getValue())) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	private boolean isSatisfyColumnValue(Condition condition, Datatype type, String value) {
+		if (type == Datatype.STRING) {
+			switch (condition.getOperator()) {
+			case EQUAL:
+				if (condition.getValue().equals(value)) {
+					return true;
+				}
+				break;
+			case NOT_EQUAL:
+				if (condition.getValue() != value) {
+					return true;
+				}
+				if (condition.getValue() != null && !condition.getValue().equals(value)) {
+					return true;
+				}
+				break;
+			default:
+				break;
+			}
+
+		} else if (type == Datatype.INTEGER) {
+			int valueInInt = Integer.valueOf(value);
+			int constraintValueInInt = Integer.valueOf(condition.getValue());
+
+			switch (condition.getOperator()) {
+			case GRREATER_THAN:
+				if (valueInInt > constraintValueInInt) {
+					return true;
+				}
+				break;
+			case GRREATER_THAN_EQUAL:
+				if (valueInInt >= constraintValueInInt) {
+					return true;
+				}
+				break;
+			case EQUAL:
+				if (valueInInt == constraintValueInInt) {
+					return true;
+				}
+				break;
+			case NOT_EQUAL:
+				if (valueInInt != constraintValueInInt) {
+					return true;
+				}
+				break;
+			case LESS_THAN:
+				if (valueInInt < constraintValueInInt) {
+					return true;
+				}
+				break;
+			case LESS_THAN_EQUAL:
+				if (valueInInt <= constraintValueInInt) {
+					return true;
+				}
+				break;
+
+			default:
+				break;
+			}
+		}
+		return false;
+	}
+
+}
