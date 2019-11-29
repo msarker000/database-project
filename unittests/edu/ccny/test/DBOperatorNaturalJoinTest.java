@@ -8,6 +8,7 @@ import java.util.Set;
 import org.junit.Test;
 
 import edu.ccny.db.project.DBOperator;
+import edu.ccny.db.project.DBService;
 import edu.ccny.db.project.ForeignKey;
 import edu.ccny.db.project.JoinTuple;
 import edu.ccny.db.project.Table;
@@ -25,12 +26,15 @@ public class DBOperatorNaturalJoinTest {
 		// add primary key
 		Set<Character> departmentKey = new LinkedHashSet<>();
 		departmentKey.add('C');
-		departmentTable.addKey(departmentKey);
+		departmentTable.addPrimaryKey(departmentKey);
 
 		departmentTable.insert("DSE", "Phiphes D Costa", "1004");
 		departmentTable.insert("CSE", "Winct Silva", "1001");
 		departmentTable.insert("CHSE", "Michele Grosbug", "1002");
 		departmentTable.insert("PHSE", "Jhon Mike", "1003");
+		
+		
+		assertEquals(4, departmentTable.getTuples().values().size());
 
 		// student table
 		Table studentTable = new Table("Student");
@@ -42,20 +46,22 @@ public class DBOperatorNaturalJoinTest {
 		// add primary key
 		Set<Character> studentkey = new LinkedHashSet<>();
 		studentkey.add('R');
-		studentTable.addKey(studentkey);
+		studentTable.addPrimaryKey(studentkey);
 
 		Set<Character> forKey = new LinkedHashSet<>();
 		forKey.add('C');
 		ForeignKey foreignKey = new ForeignKey(departmentTable, forKey);
 		studentTable.addForeignKey(foreignKey);
 
-		DBOperator dbOperator = new DBOperator();
+		DBService dbOperator = new DBOperator();
 		dbOperator.addTable(studentTable);
 		dbOperator.addTable(departmentTable);
 
 		studentTable.insert("Tom3", "32", "110", "1004");
 		studentTable.insert("Ayub", "35", "100", "1001");
 		studentTable.insert("Jenny", "37", "101", "1002");
+		
+		assertEquals(3, studentTable.getTuples().values().size());
 
 		Set<JoinTuple> joinTuples = dbOperator.naturalJoin("Student", "Department");
 		assertEquals(3, joinTuples.size());
@@ -63,7 +69,7 @@ public class DBOperatorNaturalJoinTest {
 		studentTable.insert("Calos", "37", "120", "1003");
 		joinTuples = dbOperator.naturalJoin("Student", "Department");
 		assertEquals(4, joinTuples.size());
-		
+
 		studentTable.insert("Tony", "37", "140", "1003");
 		joinTuples = dbOperator.naturalJoin("Student", "Department");
 		assertEquals(5, joinTuples.size());

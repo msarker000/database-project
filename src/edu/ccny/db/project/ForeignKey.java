@@ -32,5 +32,12 @@ public class ForeignKey {
 	public Set<Character> getKey() {
 		return key;
 	}
+
+	@Override
+	public String toString() {
+		return "ForeignKey [table=" + table.getName() + ", key=" + key + ", action=" + action + "]";
+	}
+	
+	
 	
 }

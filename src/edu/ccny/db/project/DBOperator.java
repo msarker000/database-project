@@ -10,30 +10,28 @@ import java.util.stream.Collectors;
 
 import edu.ccny.db.assignment.SetUtil;
 
-public class DBOperator {
+public class DBOperator implements DBService {
 
 	private Map<String, Table> tables = new HashMap<>();
 
-	public enum LOGICAL {
-		AND, OR
-	}
 
-	public void addTable(Table table) {
-		this.tables.put(table.getName().toLowerCase(), table);
-	}
-
-	/**
-	 * Selects tuples based on conditions and Logical AND or Condition
-	 * 
-	 * @param tableName
-	 *            the table name
-	 * @param conditions
-	 *            the list of condition
-	 * @param logicType
-	 *            the logic type AND or OR
-	 * 
-	 * @return list of tuples that satisfy the condition;
+	/* (non-Javadoc)
+	 * @see edu.ccny.db.project.DBService#addTable(edu.ccny.db.project.Table)
 	 */
+	@Override
+	public void addTable(Table table) {
+		tables.put(table.getName().toLowerCase(), table);
+	}
+	
+	@Override
+	public Table getTable(String tableName) {
+		return tables.get(tableName.toLowerCase());
+	}
+
+	/* (non-Javadoc)
+	 * @see edu.ccny.db.project.DBService#select(java.lang.String, java.util.List, edu.ccny.db.project.DBOperator.LOGICAL)
+	 */
+	@Override
 	public Set<Tuple> select(String tableName, List<Condition> conditions, LOGICAL logicType) {
 		Set<Tuple> tuples = null;
 		try {
@@ -59,15 +57,10 @@ public class DBOperator {
 		return tuple.getValue(ch);
 	}
 
-	/**
-	 * Selects tuples with group
-	 * 
-	 * @param tableName
-	 *            the name of table
-	 * @param groupBy
-	 *            the list of column attribute
-	 * @return list of tuple with group
+	/* (non-Javadoc)
+	 * @see edu.ccny.db.project.DBService#groupBy(java.lang.String, java.util.Set)
 	 */
+	@Override
 	public Map<String, List<Tuple>> groupBy(String tableName, Set<Character> groupBy) {
 		try {
 			Table table = tables.get(tableName.toLowerCase());
@@ -82,15 +75,10 @@ public class DBOperator {
 		}
 	}
 
-	/**
-	 * Selects tuples from two tables using Cross join
-	 * 
-	 * @param tableName1
-	 *            the first table name
-	 * @param tableName2
-	 *            the second table name
-	 * @return list of join tuple
+	/* (non-Javadoc)
+	 * @see edu.ccny.db.project.DBService#crossJoin(java.lang.String, java.lang.String)
 	 */
+	@Override
 	public Set<JoinTuple> crossJoin(String tableName1, String tableName2) {
 		Set<JoinTuple> joinTuples = new LinkedHashSet<>();
 		try {
@@ -117,15 +105,10 @@ public class DBOperator {
 		return joinTuples;
 	}
 
-	/**
-	 * Selects tuples from two tables using natural join
-	 * 
-	 * @param tableName1
-	 *            the first table name
-	 * @param tableName2
-	 *            the second table name
-	 * @return list of join tuple
+	/* (non-Javadoc)
+	 * @see edu.ccny.db.project.DBService#naturalJoin(java.lang.String, java.lang.String)
 	 */
+	@Override
 	public Set<JoinTuple> naturalJoin(String tableName1, String tableName2) {
 		Set<JoinTuple> naturalJoinTuples = new LinkedHashSet<>();
 
@@ -165,18 +148,10 @@ public class DBOperator {
 		return naturalJoinTuples;
 	}
 
-	/**
-	 * Selects tuples from two tables using join condition
-	 * 
-	 * @param tableName1
-	 *            the first table name
-	 * @param tableName2
-	 *            the second table name
-	 * @param joinCondition
-	 *            the joinCondition of two table
-	 * 
-	 * @return list of join tuple
+	/* (non-Javadoc)
+	 * @see edu.ccny.db.project.DBService#join(java.lang.String, java.lang.String, edu.ccny.db.project.JoinCondition)
 	 */
+	@Override
 	public Set<JoinTuple> join(String tableName1, String tableName2, JoinCondition joinCondition) {
 
 		Set<JoinTuple> joinTuples = new LinkedHashSet<>();
@@ -212,16 +187,10 @@ public class DBOperator {
 		return joinTuples;
 	}
 
-	/**
-	 * finds union of two sets of tuple
-	 * 
-	 * @param tuples1
-	 *            the first set of tuples
-	 * @param tuples2
-	 *            the second set of tuples
-	 * 
-	 * @return set of tuple those are in either tables
+	/* (non-Javadoc)
+	 * @see edu.ccny.db.project.DBService#union(java.util.Set, java.util.Set)
 	 */
+	@Override
 	public Set<Tuple> union(Set<Tuple> tuples1, Set<Tuple> tuples2) {
 		try {
 			Set<Tuple> tuples = SetUtil.union(tuples1, tuples2);
@@ -233,16 +202,10 @@ public class DBOperator {
 
 	}
 
-	/**
-	 * finds intersection of two sets of tuple
-	 * 
-	 * @param tuples1
-	 *            the first set of tuples
-	 * @param tuples2
-	 *            the second set of tuples
-	 * 
-	 * @return set of tuple those are in common in both table
+	/* (non-Javadoc)
+	 * @see edu.ccny.db.project.DBService#intersection(java.util.Set, java.util.Set)
 	 */
+	@Override
 	public Set<Tuple> intersection(Set<Tuple> tuples1, Set<Tuple> tuples2) {
 		try {
 			Set<Tuple> tuples = SetUtil.intersection(tuples1, tuples2);
@@ -253,17 +216,10 @@ public class DBOperator {
 		}
 	}
 
-	/**
-	 * finds difference of two sets of tuple
-	 * 
-	 * @param tuples1
-	 *            the first set of tuples
-	 * @param tuples2
-	 *            the second set of tuples
-	 * 
-	 * @return list of tuple those are in tuples1 but not in tuples2
-	 * 
+	/* (non-Javadoc)
+	 * @see edu.ccny.db.project.DBService#difference(java.util.Set, java.util.Set)
 	 */
+	@Override
 	public Set<Tuple> difference(Set<Tuple> tuples1, Set<Tuple> tuples2) {
 		try {
 			Set<Tuple> tuples = SetUtil.difference(tuples1, tuples2);

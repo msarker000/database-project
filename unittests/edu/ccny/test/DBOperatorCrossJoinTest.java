@@ -8,6 +8,7 @@ import java.util.Set;
 import org.junit.Test;
 
 import edu.ccny.db.project.DBOperator;
+import edu.ccny.db.project.DBService;
 import edu.ccny.db.project.JoinTuple;
 import edu.ccny.db.project.Table;
 
@@ -25,7 +26,7 @@ public class DBOperatorCrossJoinTest {
 		// add primary key
 		Set<Character> studentkey = new LinkedHashSet<>();
 		studentkey.add('R');
-		studentTable.addKey(studentkey);
+		studentTable.addPrimaryKey(studentkey);
 
 		// student table
 		Table departmentTable = new Table("Department");
@@ -36,38 +37,33 @@ public class DBOperatorCrossJoinTest {
 		// add primary key
 		Set<Character> departmentKey = new LinkedHashSet<>();
 		departmentKey.add('C');
-		departmentTable.addKey(departmentKey);
-		
-		DBOperator dbOperator = new DBOperator(); 
+		departmentTable.addPrimaryKey(departmentKey);
+
+		DBService dbOperator = new DBOperator();
 		dbOperator.addTable(studentTable);
 		dbOperator.addTable(departmentTable);
-		
+
 		studentTable.insert("Tom3", "32", "110", "1004");
 		studentTable.insert("Ayub", "35", "100", "1001");
 		studentTable.insert("Jenny", "37", "101", "1002");
-		
-		
-		departmentTable.insert("DSE","Phiphes D Costa","1004");
-		departmentTable.insert("CSE","Winct Silva","1001");
-		departmentTable.insert("CHSE","Michele Grosbug","1002");
-		
-		Set<JoinTuple> joinTuples =  dbOperator.crossJoin("Student", "Department");
-		
+
+		departmentTable.insert("DSE", "Phiphes D Costa", "1004");
+		departmentTable.insert("CSE", "Winct Silva", "1001");
+		departmentTable.insert("CHSE", "Michele Grosbug", "1002");
+
+		Set<JoinTuple> joinTuples = dbOperator.crossJoin("Student", "Department");
+
 		assertEquals(9, joinTuples.size());
-		
-		
+
 		boolean isFirstTuple = true;
-		for(JoinTuple joinTule: joinTuples){
-			if(isFirstTuple){
+		for (JoinTuple joinTule : joinTuples) {
+			if (isFirstTuple) {
 				System.out.println(joinTule.getHeaderString());
 				isFirstTuple = false;
 			}
 			System.out.println(joinTule.getStringValues());
 		}
-		
-		
-		
-		
+
 	}
 
 }

@@ -8,6 +8,7 @@ import java.util.Set;
 import org.junit.Test;
 
 import edu.ccny.db.project.DBOperator;
+import edu.ccny.db.project.DBService;
 import edu.ccny.db.project.ForeignKey;
 import edu.ccny.db.project.JoinCondition;
 import edu.ccny.db.project.JoinTuple;
@@ -27,7 +28,7 @@ public class DBOpertatorJoinTest {
 		// add primary key
 		Set<Character> departmentKey = new LinkedHashSet<>();
 		departmentKey.add('I');
-		departmentTable.addKey(departmentKey);
+		departmentTable.addPrimaryKey(departmentKey);
 
 		departmentTable.insert("DSE", "Phiphes D Costa", "1004");
 		departmentTable.insert("CSE", "Winct Silva", "1001");
@@ -45,9 +46,9 @@ public class DBOpertatorJoinTest {
 		// add primary key
 		Set<Character> studentkey = new LinkedHashSet<>();
 		studentkey.add('R');
-		studentTable.addKey(studentkey);
+		studentTable.addPrimaryKey(studentkey);
 
-		DBOperator database = new DBOperator();
+		DBService database = new DBOperator();
 		database.addTable(studentTable);
 		database.addTable(departmentTable);
 

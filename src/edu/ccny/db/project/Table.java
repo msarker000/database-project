@@ -25,6 +25,8 @@ public class Table {
 	public Map<Character, Column> columns = new LinkedHashMap<Character, Column>();
 	private Map<String, Tuple> tuples = new Hashtable<>();
 	private StringBuilder primaryKeyValuebuilder = new StringBuilder();
+
+	private Map<String, Constraint> constrainsMap = new LinkedHashMap<>();
 	private Map<Character, List<Constraint>> constraints = new LinkedHashMap<Character, List<Constraint>>();
 	private List<Table> tablesDependOnMe = new ArrayList<>();
 
@@ -57,18 +59,37 @@ public class Table {
 		this.tablesDependOnMe.add(table);
 	}
 
-	public void addKey(Set<Character> primaryKey) {
+	public void addPrimaryKey(Set<Character> primaryKey) {
 		this.primaryKey = primaryKey;
 	}
-
+	
+	public void removePrimaryKey(){
+    	primaryKey = null;
+	}
+	
+	public void removeForeignKey(){
+		foreignKey = null;
+	}
+	
 	public void addConstrain(Constraint constraint) {
 		List<Constraint> constraintList = this.constraints.get(constraint.getAttribute());
 		if (constraintList == null) {
 			constraintList = new ArrayList<>();
 		}
 		constraintList.add(constraint);
-
+		constrainsMap.put(constraint.getName(), constraint);
 		constraints.put(constraint.getAttribute(), constraintList);
+	}
+	
+	/**
+	 * remove a constrains from table
+	 * 
+	 * @param name
+	 */
+	public void removeConstrains(String name){
+		Constraint constraint  = constrainsMap.remove(name);
+		List<Constraint> constraintList = this.constraints.get(constraint.getAttribute());
+		constraintList.remove(constraint);
 	}
 
 	/**
@@ -95,8 +116,12 @@ public class Table {
 				return;
 			}
 			newTuple.addColumn(column);
-			if (primaryKey.contains(col)) {
+			if(primaryKey == null){
 				primaryKeyValuebuilder.append(values[i]);
+			}else{
+				if(primaryKey.contains(col)){
+					primaryKeyValuebuilder.append(values[i]);
+				}
 			}
 			i++;
 		}
@@ -204,8 +229,8 @@ public class Table {
 
 		} else if (type == Datatype.INTEGER) {
 			int valueInInt = Integer.valueOf(value);
-			int constraintValueInInt = Integer.valueOf(constraint.getValue());
-
+			int constraintValueInInt = constraint.getValue() != null ? Integer.valueOf(constraint.getValue()): -1;
+			
 			switch (constraint.getOperator()) {
 			case GRREATER_THAN:
 				if (valueInInt > constraintValueInInt) {
