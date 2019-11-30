@@ -22,7 +22,7 @@ public class TableTest {
 		departmentTable.addColumn('C', "integer"); // code of the department
 		Set<Character> deptkey = new LinkedHashSet<>();
 		deptkey.add('C');
-		departmentTable.addPrimaryKey(deptkey);
+		departmentTable.addPrimaryKey(deptkey, "");
 		departmentTable.addConstrain(new Constraint('N', Operator.NOT_EQUAL, null, "N_NOT_NULL"));
 
 		//
@@ -42,12 +42,12 @@ public class TableTest {
 		// add primary key
 		Set<Character> studentkey = new LinkedHashSet<>();
 		studentkey.add('R');
-		studentTable.addPrimaryKey(studentkey);
+		studentTable.addPrimaryKey(studentkey,"");
 
 		// foreignKey
 		Set<Character> forKey = new LinkedHashSet<>();
 		forKey.add('C');
-		ForeignKey foreignKey = new ForeignKey(departmentTable, forKey);
+		ForeignKey foreignKey = new ForeignKey(departmentTable, forKey, "");
 		studentTable.addForeignKey(foreignKey);
 
 		// add constraints
@@ -91,7 +91,7 @@ public class TableTest {
 		departmentTable.addColumn('C', "integer"); // code of the department
 		Set<Character> deptkey = new LinkedHashSet<>();
 		deptkey.add('C');
-		departmentTable.addPrimaryKey(deptkey);
+		departmentTable.addPrimaryKey(deptkey, "");
 		departmentTable.addConstrain(new Constraint('N', Operator.NOT_EQUAL, null, "N_NOT_EQUAL"));
 
 		//
@@ -111,12 +111,12 @@ public class TableTest {
 		// add primary key
 		Set<Character> studentkey = new LinkedHashSet<>();
 		studentkey.add('R');
-		studentTable.addPrimaryKey(studentkey);
+		studentTable.addPrimaryKey(studentkey,"");
 
 		// foreignKey
 		Set<Character> forKey = new LinkedHashSet<>();
 		forKey.add('C');
-		ForeignKey foreignKey = new ForeignKey(departmentTable, forKey);
+		ForeignKey foreignKey = new ForeignKey(departmentTable, forKey, "");
 		studentTable.addForeignKey(foreignKey);
 
 		Constraint constraint1 = new Constraint('N', Operator.NOT_EQUAL, null, "N_NOT_EQUAL");

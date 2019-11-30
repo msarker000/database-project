@@ -26,7 +26,7 @@ public class DBOperatorNaturalJoinTest {
 		// add primary key
 		Set<Character> departmentKey = new LinkedHashSet<>();
 		departmentKey.add('C');
-		departmentTable.addPrimaryKey(departmentKey);
+		departmentTable.addPrimaryKey(departmentKey,"");
 
 		departmentTable.insert("DSE", "Phiphes D Costa", "1004");
 		departmentTable.insert("CSE", "Winct Silva", "1001");
@@ -46,11 +46,11 @@ public class DBOperatorNaturalJoinTest {
 		// add primary key
 		Set<Character> studentkey = new LinkedHashSet<>();
 		studentkey.add('R');
-		studentTable.addPrimaryKey(studentkey);
+		studentTable.addPrimaryKey(studentkey,"");
 
 		Set<Character> forKey = new LinkedHashSet<>();
 		forKey.add('C');
-		ForeignKey foreignKey = new ForeignKey(departmentTable, forKey);
+		ForeignKey foreignKey = new ForeignKey(departmentTable, forKey,"");
 		studentTable.addForeignKey(foreignKey);
 
 		DBService dbOperator = new DBOperator();

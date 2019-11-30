@@ -1,33 +1,31 @@
 package edu.ccny.db.project;
 
-
 public class Column implements Cloneable {
-	
+
 	private final Character name;
 	private final Datatype type;
 	private String value;
-  
+
 	public Column(Character name, Datatype type) {
 		this.name = name;
 		this.type = type;
 	}
-	
+
 	public void setValue(String value) {
 		this.value = value;
 	}
-	
+
 	public String getValue() {
 		return value;
 	}
-	
+
 	public Character getName() {
 		return name;
 	}
-	
+
 	public Datatype getType() {
 		return type;
 	}
-	
 
 	@Override
 	public int hashCode() {
@@ -68,23 +66,25 @@ public class Column implements Cloneable {
 		return "Column [name=" + name + ", type=" + type + ", value=" + value + "]";
 	}
 	
+
+	public String printableFormat() {
+		return "name: "+name + ", dataType: " + type ;
+	}
+
 	@Override
 	protected Object clone() throws CloneNotSupportedException {
 		return super.clone();
 	}
-	
-	
+
 	public static void main(String[] args) throws CloneNotSupportedException {
 		Column column = new Column('A', Datatype.STRING);
 		column.setValue("ayub");
-		
-		
+
 		Column column2 = (Column) column.clone();
 		column2.setValue("Yakub");
-		
+
 		System.out.println(column);
 		System.out.println(column2);
 	}
-	
 
 }

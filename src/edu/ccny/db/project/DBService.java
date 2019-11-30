@@ -4,12 +4,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-
 public interface DBService {
-	
+
 	enum LOGICAL {
 		AND, OR
 	}
+
 	void addTable(Table table);
 
 	/**
@@ -109,12 +109,12 @@ public interface DBService {
 	 * 
 	 */
 	Set<Tuple> difference(Set<Tuple> tuples1, Set<Tuple> tuples2);
-	
-	
+
 	/**
 	 * finds table for name
 	 * 
-	 * @param tableName the tableName
+	 * @param tableName
+	 *            the tableName
 	 * @return table
 	 */
 	Table getTable(String tableName);

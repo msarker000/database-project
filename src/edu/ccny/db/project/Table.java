@@ -18,9 +18,10 @@ import org.omg.CORBA.portable.ValueInputStream;
  */
 
 public class Table {
-	
+
 	private String name;
 	private Set<Character> primaryKey;
+	private String primaryKeyName;
 	private ForeignKey foreignKey;
 	public Map<Character, Column> columns = new LinkedHashMap<Character, Column>();
 	private Map<String, Tuple> tuples = new Hashtable<>();
@@ -46,11 +47,12 @@ public class Table {
 		columns.put(colName, colObj);
 	}
 
+	
 	public void addForeignKey(ForeignKey foreignKey) {
 		this.foreignKey = foreignKey;
 		this.foreignKey.getTable().addTableDependOnMe(this);
 	}
-	
+
 	public ForeignKey getForeignKey() {
 		return foreignKey;
 	}
@@ -58,19 +60,25 @@ public class Table {
 	public void addTableDependOnMe(Table table) {
 		this.tablesDependOnMe.add(table);
 	}
+	
+	public String getPrimaryKeyName() {
+		return primaryKeyName;
+	}
 
-	public void addPrimaryKey(Set<Character> primaryKey) {
+	public void addPrimaryKey(Set<Character> primaryKey, String primaryKeyName) {
 		this.primaryKey = primaryKey;
+		this.primaryKeyName = primaryKeyName;
 	}
-	
-	public void removePrimaryKey(){
-    	primaryKey = null;
+
+	public void removePrimaryKey() {
+		primaryKey = null;
+		primaryKeyName = null;
 	}
-	
-	public void removeForeignKey(){
+
+	public void removeForeignKey() {
 		foreignKey = null;
 	}
-	
+
 	public void addConstrain(Constraint constraint) {
 		List<Constraint> constraintList = this.constraints.get(constraint.getAttribute());
 		if (constraintList == null) {
@@ -80,22 +88,29 @@ public class Table {
 		constrainsMap.put(constraint.getName(), constraint);
 		constraints.put(constraint.getAttribute(), constraintList);
 	}
-	
+
 	/**
 	 * remove a constrains from table
 	 * 
 	 * @param name
 	 */
-	public void removeConstrains(String name){
-		Constraint constraint  = constrainsMap.remove(name);
+	public boolean removeConstrains(String name) {
+		Constraint constraint = constrainsMap.remove(name);
+		if (constraint == null) {
+			return false;
+		}
 		List<Constraint> constraintList = this.constraints.get(constraint.getAttribute());
-		constraintList.remove(constraint);
+		if (!constraintList.remove(constraint)) {
+			return false;
+		}
+		return true;
 	}
 
 	/**
 	 * insert values into table
 	 * 
-	 * @param values, the values to be inserted
+	 * @param values,
+	 *            the values to be inserted
 	 * 
 	 */
 	public void insert(String... values) {
@@ -116,10 +131,10 @@ public class Table {
 				return;
 			}
 			newTuple.addColumn(column);
-			if(primaryKey == null){
+			if (primaryKey == null) {
 				primaryKeyValuebuilder.append(values[i]);
-			}else{
-				if(primaryKey.contains(col)){
+			} else {
+				if (primaryKey.contains(col)) {
 					primaryKeyValuebuilder.append(values[i]);
 				}
 			}
@@ -150,31 +165,31 @@ public class Table {
 
 		tuples.put(newTuple.getKeyValue(), newTuple);
 	}
-	
+
 	/**
 	 * finds tuple that matched the key value
 	 * 
 	 * @param key
 	 * @return
 	 */
-	
-	public Tuple getTuple(String key){
+
+	public Tuple getTuple(String key) {
 		return tuples.get(key);
-		
+
 	}
-	
+
 	/**
 	 * finds the tuple that matches the column and value
 	 * 
-	 * @param column the column to be matched
-	 * @param value the value to be matched
+	 * @param column
+	 *            the column to be matched
+	 * @param value
+	 *            the value to be matched
 	 * @return
 	 */
-	public Tuple getTuple(Column column, String value){
-		
-		return tuples.values().stream().filter(tupe->tupe.getValue(column).equals(value))
-						.findFirst()
-						.orElse(null);
+	public Tuple getTuple(Column column, String value) {
+
+		return tuples.values().stream().filter(tupe -> tupe.getValue(column).equals(value)).findFirst().orElse(null);
 	}
 
 	/**
@@ -229,8 +244,8 @@ public class Table {
 
 		} else if (type == Datatype.INTEGER) {
 			int valueInInt = Integer.valueOf(value);
-			int constraintValueInInt = constraint.getValue() != null ? Integer.valueOf(constraint.getValue()): -1;
-			
+			int constraintValueInInt = constraint.getValue() != null ? Integer.valueOf(constraint.getValue()) : -1;
+
 			switch (constraint.getOperator()) {
 			case GRREATER_THAN:
 				if (valueInInt > constraintValueInInt) {
@@ -278,11 +293,11 @@ public class Table {
 	public void delete(String keyValue) {
 		// first delete from this table
 		deleteEntryFromTable(this, keyValue);
-		
+
 		// update dependent table based their DELETE_ACTION
-		for(Table eachTable: tablesDependOnMe){
-			switch(eachTable.foreignKey.getAction()){
-			case  CASCADE:
+		for (Table eachTable : tablesDependOnMe) {
+			switch (eachTable.foreignKey.getAction()) {
+			case CASCADE:
 				deleteAllEntryFromTableByForeignKey(eachTable, keyValue);
 				break;
 			case SET_NULL:
@@ -290,9 +305,9 @@ public class Table {
 				setNullToAllEntryFromTableByForeignKey(eachTable, keyValue);
 				break;
 			case NO_ACTION:
-				//Do nothing
+				// Do nothing
 				break;
-			
+
 			}
 			deleteAllEntryFromTableByForeignKey(eachTable, keyValue);
 		}
@@ -300,18 +315,18 @@ public class Table {
 	}
 
 	private void deleteAllEntryFromTableByForeignKey(Table table, String foreignKeyValue) {
-		// find all the tuples on the table that matches the foreign keyValue 
+		// find all the tuples on the table that matches the foreign keyValue
 		Set<String> tupleKeys = table.tuples.values().stream().filter(x -> {
 			return x.getValue(table.foreignKey.getKey()).equals(foreignKeyValue);
 		}).map(x -> x.getKeyValue()).collect(Collectors.toSet());
 
-		//delete all the tuples key
-		tupleKeys.forEach(x->{
+		// delete all the tuples key
+		tupleKeys.forEach(x -> {
 			deleteEntryFromTable(table, x);
 		});
-		
+
 	}
-	
+
 	private void setNullToAllEntryFromTableByForeignKey(Table table, String foreignKeyValue) {
 		// find all the tuple key that match the foreign keyValue
 		Set<String> tupleKeys = table.tuples.values().stream().filter(x -> {
@@ -319,11 +334,11 @@ public class Table {
 		}).map(x -> x.getKeyValue()).collect(Collectors.toSet());
 
 		// update tuple with null values in the foreign key column
-		for(String tupleKey: tupleKeys){
-			 Tuple tuple =	table.tuples.get(tupleKey);
-			 for(Character ch : table.foreignKey.getKey()){
-				 tuple.setValue(ch, null);
-			 }
+		for (String tupleKey : tupleKeys) {
+			Tuple tuple = table.tuples.get(tupleKey);
+			for (Character ch : table.foreignKey.getKey()) {
+				tuple.setValue(ch, null);
+			}
 		}
 	}
 
@@ -350,9 +365,9 @@ public class Table {
 	public Map<String, Tuple> getTuples() {
 		return tuples;
 	}
-	
-	public void update(Character ch, String value){
-		for(Tuple tuple: tuples.values()){
+
+	public void update(Character ch, String value) {
+		for (Tuple tuple : tuples.values()) {
 			tuple.setValue(ch, value);
 		}
 	}
@@ -374,6 +389,28 @@ public class Table {
 	public String toString() {
 		return "Table [name=" + name + ", primaryKey=" + primaryKey + ", foreignKey=" + foreignKey + ", columns="
 				+ columns + ", tuples=" + tuples + ", constraints=" + constraints + "]";
+	}
+	
+	
+	public String describeTable(){
+		StringBuilder sb = new StringBuilder();
+		sb.append(String.format("---------------Table Name:%s-----------------------------\n", name));
+		sb.append(String.format("---------------List of Columns--------------------------\n", name));
+		for(Column column:columns.values()){
+			sb.append(column.printableFormat()+"\n");
+		}
+		sb.append("\n");
+		sb.append(String.format("Primary key:%s , name: %s\n", primaryKey, primaryKeyName));
+		if(foreignKey != null){
+			sb.append(String.format("foreignKey key:%s , name: %s , reference table: %s on Delete: %s\n", 
+					foreignKey.getKey(), foreignKey.getName(),foreignKey.getTable().getName(), foreignKey.getAction()));	
+		}
+		sb.append(String.format("--------------------------List of Constraint-----------------------------\n", name));
+		for(Constraint  constraint:constrainsMap.values()){
+			sb.append(constraint).append("\n");
+		}
+		sb.append("\n");
+		return sb.toString();
 	}
 
 }

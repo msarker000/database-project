@@ -12,7 +12,7 @@ import edu.ccny.db.project.Table;
 public class AppCreateTableTest {
 
 	@Test
-	public void test() {
+	public void test() throws Exception {
 
 		DBService dbService = new DBOperator();
 		InputProcessor inputProcessor = new InputProcessor(dbService);
@@ -50,7 +50,19 @@ public class AppCreateTableTest {
 	//	ADD CONSTRAINT FK_PersonOrder
 	//	FOREIGN KEY (PersonID) REFERENCES Persons(PersonID);
 
-		inputProcessor.alterTable("ALTER TABLE Student ADD CONSTRAINT FK_Student FOREIGN KEY (C) REFERENCES Department(C);");
+//		inputProcessor.alterTable("ALTER TABLE Student ADD CONSTRAINT FK_Student FOREIGN KEY (C) REFERENCES Department(C);");
+		inputProcessor.alterTable("ALTER TABLE Student ADD CONSTRAINT FK_Student FOREIGN KEY (C) REFERENCES Department(C) on DELETE CASCADE;");
+
+		inputProcessor.alterTable("ALTER TABLE Student ADD CONSTRAINT check_id_non_zero CHECK (R > 0);");
+		
+	//
+		
+		System.out.println(studentTable.describeTable());
+		
+		
+		inputProcessor.alterTable("ALTER TABLE Student DROP CONSTRAINT check_id_non_zero");
+		
+		System.out.println(studentTable.describeTable());
 	}
 
 }

@@ -26,7 +26,7 @@ public class DBOperatorCrossJoinTest {
 		// add primary key
 		Set<Character> studentkey = new LinkedHashSet<>();
 		studentkey.add('R');
-		studentTable.addPrimaryKey(studentkey);
+		studentTable.addPrimaryKey(studentkey,"");
 
 		// student table
 		Table departmentTable = new Table("Department");
@@ -37,7 +37,7 @@ public class DBOperatorCrossJoinTest {
 		// add primary key
 		Set<Character> departmentKey = new LinkedHashSet<>();
 		departmentKey.add('C');
-		departmentTable.addPrimaryKey(departmentKey);
+		departmentTable.addPrimaryKey(departmentKey,"");
 
 		DBService dbOperator = new DBOperator();
 		dbOperator.addTable(studentTable);

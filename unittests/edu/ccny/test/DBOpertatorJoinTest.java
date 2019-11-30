@@ -28,7 +28,7 @@ public class DBOpertatorJoinTest {
 		// add primary key
 		Set<Character> departmentKey = new LinkedHashSet<>();
 		departmentKey.add('I');
-		departmentTable.addPrimaryKey(departmentKey);
+		departmentTable.addPrimaryKey(departmentKey, "");
 
 		departmentTable.insert("DSE", "Phiphes D Costa", "1004");
 		departmentTable.insert("CSE", "Winct Silva", "1001");
@@ -46,7 +46,7 @@ public class DBOpertatorJoinTest {
 		// add primary key
 		Set<Character> studentkey = new LinkedHashSet<>();
 		studentkey.add('R');
-		studentTable.addPrimaryKey(studentkey);
+		studentTable.addPrimaryKey(studentkey, "");
 
 		DBService database = new DBOperator();
 		database.addTable(studentTable);

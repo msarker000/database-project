@@ -2,14 +2,14 @@ package edu.ccny.db.project;
 
 enum Datatype {
 	STRING, INTEGER, NOT_SUPORTED;
-	
-	public static Datatype getValueOf(String type){
-		if(type.equalsIgnoreCase("string")) {
+
+	public static Datatype getValueOf(String type) {
+		if (type.equalsIgnoreCase("string")) {
 			return STRING;
-		}else if(type.equalsIgnoreCase("integer")) {
+		} else if (type.equalsIgnoreCase("integer")) {
 			return INTEGER;
-			
-		}else {
+
+		} else {
 			return NOT_SUPORTED;
 		}
 	}

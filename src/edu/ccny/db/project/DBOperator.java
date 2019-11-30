@@ -14,22 +14,26 @@ public class DBOperator implements DBService {
 
 	private Map<String, Table> tables = new HashMap<>();
 
-
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see edu.ccny.db.project.DBService#addTable(edu.ccny.db.project.Table)
 	 */
 	@Override
 	public void addTable(Table table) {
 		tables.put(table.getName().toLowerCase(), table);
 	}
-	
+
 	@Override
 	public Table getTable(String tableName) {
 		return tables.get(tableName.toLowerCase());
 	}
 
-	/* (non-Javadoc)
-	 * @see edu.ccny.db.project.DBService#select(java.lang.String, java.util.List, edu.ccny.db.project.DBOperator.LOGICAL)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see edu.ccny.db.project.DBService#select(java.lang.String,
+	 * java.util.List, edu.ccny.db.project.DBOperator.LOGICAL)
 	 */
 	@Override
 	public Set<Tuple> select(String tableName, List<Condition> conditions, LOGICAL logicType) {
@@ -57,8 +61,11 @@ public class DBOperator implements DBService {
 		return tuple.getValue(ch);
 	}
 
-	/* (non-Javadoc)
-	 * @see edu.ccny.db.project.DBService#groupBy(java.lang.String, java.util.Set)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see edu.ccny.db.project.DBService#groupBy(java.lang.String,
+	 * java.util.Set)
 	 */
 	@Override
 	public Map<String, List<Tuple>> groupBy(String tableName, Set<Character> groupBy) {
@@ -75,8 +82,11 @@ public class DBOperator implements DBService {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see edu.ccny.db.project.DBService#crossJoin(java.lang.String, java.lang.String)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see edu.ccny.db.project.DBService#crossJoin(java.lang.String,
+	 * java.lang.String)
 	 */
 	@Override
 	public Set<JoinTuple> crossJoin(String tableName1, String tableName2) {
@@ -105,8 +115,11 @@ public class DBOperator implements DBService {
 		return joinTuples;
 	}
 
-	/* (non-Javadoc)
-	 * @see edu.ccny.db.project.DBService#naturalJoin(java.lang.String, java.lang.String)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see edu.ccny.db.project.DBService#naturalJoin(java.lang.String,
+	 * java.lang.String)
 	 */
 	@Override
 	public Set<JoinTuple> naturalJoin(String tableName1, String tableName2) {
@@ -148,8 +161,11 @@ public class DBOperator implements DBService {
 		return naturalJoinTuples;
 	}
 
-	/* (non-Javadoc)
-	 * @see edu.ccny.db.project.DBService#join(java.lang.String, java.lang.String, edu.ccny.db.project.JoinCondition)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see edu.ccny.db.project.DBService#join(java.lang.String,
+	 * java.lang.String, edu.ccny.db.project.JoinCondition)
 	 */
 	@Override
 	public Set<JoinTuple> join(String tableName1, String tableName2, JoinCondition joinCondition) {
@@ -187,7 +203,9 @@ public class DBOperator implements DBService {
 		return joinTuples;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see edu.ccny.db.project.DBService#union(java.util.Set, java.util.Set)
 	 */
 	@Override
@@ -202,8 +220,11 @@ public class DBOperator implements DBService {
 
 	}
 
-	/* (non-Javadoc)
-	 * @see edu.ccny.db.project.DBService#intersection(java.util.Set, java.util.Set)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see edu.ccny.db.project.DBService#intersection(java.util.Set,
+	 * java.util.Set)
 	 */
 	@Override
 	public Set<Tuple> intersection(Set<Tuple> tuples1, Set<Tuple> tuples2) {
@@ -216,8 +237,11 @@ public class DBOperator implements DBService {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see edu.ccny.db.project.DBService#difference(java.util.Set, java.util.Set)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see edu.ccny.db.project.DBService#difference(java.util.Set,
+	 * java.util.Set)
 	 */
 	@Override
 	public Set<Tuple> difference(Set<Tuple> tuples1, Set<Tuple> tuples2) {

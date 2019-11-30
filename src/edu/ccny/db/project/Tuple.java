@@ -12,7 +12,6 @@ public class Tuple implements Comparable<Tuple> {
 	private StringBuilder builder = new StringBuilder();
 	private Map<Character, Column> values = new LinkedHashMap<Character, Column>();
 
-
 	public void addColumn(Column col) {
 		values.put(col.getName(), col);
 	}
@@ -24,39 +23,36 @@ public class Tuple implements Comparable<Tuple> {
 	public String getKeyValue() {
 		return keyValue;
 	}
-	
-	
-	public String getValue(Set<Character> cols){
+
+	public String getValue(Set<Character> cols) {
 		StringBuilder sb = new StringBuilder();
-		for(Character  ch: cols){
+		for (Character ch : cols) {
 			sb.append(values.get(ch).getValue());
 		}
-		
+
 		return sb.toString();
 	}
-	
-	
-	public String getValue(Column column){
+
+	public String getValue(Column column) {
 		return values.get(column.getName()).getValue();
 	}
-	
+
 	public Map<Character, Column> getValues() {
 		return values;
 	}
-	
-	public void setValue(Character ch, String value){
+
+	public void setValue(Character ch, String value) {
 		Column col = values.get(ch);
 		col.setValue(value);
 	}
-	
-	public String getValue(Character ch){
+
+	public String getValue(Character ch) {
 		return values.get(ch).getValue();
 	}
-	
-	public Column getColumn(Character ch){
+
+	public Column getColumn(Character ch) {
 		return values.get(ch);
 	}
-	
 
 	@Override
 	public int hashCode() {
@@ -82,36 +78,35 @@ public class Tuple implements Comparable<Tuple> {
 			return false;
 		return true;
 	}
-	
+
 	@Override
 	public int compareTo(Tuple other) {
 		return this.keyValue.compareTo(other.keyValue);
 	}
 
-	
-	public String getHeaderString(){
+	public String getHeaderString() {
 		builder.setLength(0);
-		for(Character key:values.keySet()){
-			builder.append(key+"\t");
-		}
-		return  builder.toString();
-	}
-	
-	public String getStringValues(){
-		builder.setLength(0);
-		for(Column column:values.values()){
-			builder.append(column.getValue()+"\t");
+		for (Character key : values.keySet()) {
+			builder.append(key + "\t");
 		}
 		return builder.toString();
 	}
+
+	public String getStringValues() {
+		builder.setLength(0);
+		for (Column column : values.values()) {
+			builder.append(column.getValue() + "\t");
+		}
+		return builder.toString();
+	}
+
 	@Override
 	public String toString() {
 		builder.setLength(0);
-		for(Column col:values.values()){
+		for (Column col : values.values()) {
 			builder.append(col.getValue()).append("\t");
 		}
 		return builder.toString();
 	}
-	
-	
+
 }
