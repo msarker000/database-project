@@ -25,6 +25,9 @@ public interface DBService {
 	 * @return list of tuples that satisfy the condition;
 	 */
 	Set<Tuple> select(String tableName, List<Condition> conditions, LOGICAL logicType);
+	
+	
+	Set<Tuple> select(String tableName);
 
 	/**
 	 * Selects tuples with group
@@ -35,7 +38,7 @@ public interface DBService {
 	 *            the list of column attribute
 	 * @return list of tuple with group
 	 */
-	Map<String, List<Tuple>> groupBy(String tableName, Set<Character> groupBy);
+	List<Tuple> selectWithGroupBy(String tableName, Set<Character> groupBy);
 
 	/**
 	 * Selects tuples from two tables using Cross join
@@ -118,5 +121,14 @@ public interface DBService {
 	 * @return table
 	 */
 	Table getTable(String tableName);
+	
+	
+	void printTuples(List<Tuple> tuples);
+	
+	
+	void printJoinTuples(List<JoinTuple> tuples);
+	
+	
+	List<Tuple> selectWithGroupBy(List<Tuple> tuples, Set<Character> groupBy);
 
 }

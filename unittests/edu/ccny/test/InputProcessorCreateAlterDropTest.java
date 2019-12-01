@@ -9,7 +9,7 @@ import edu.ccny.db.project.DBService;
 import edu.ccny.db.project.InputProcessor;
 import edu.ccny.db.project.Table;
 
-public class AppCreateTableTest {
+public class InputProcessorCreateAlterDropTest {
 
 	@Test
 	public void test() throws Exception {
@@ -57,12 +57,35 @@ public class AppCreateTableTest {
 		
 	//
 		
-		System.out.println(studentTable.describeTable());
+	//	System.out.println(studentTable.describeTable());
 		
 		
 		inputProcessor.alterTable("ALTER TABLE Student DROP CONSTRAINT check_id_non_zero");
 		
-		System.out.println(studentTable.describeTable());
+	//	System.out.println(studentTable.describeTable());
+		
+		inputProcessor.alterTable("ALTER TABLE Student ADD COLUMN D INTEGER NOT NULL");
+		
+	//	inputProcessor.alterTable("ALTER TABLE Student ADD COLUMN D INTEGER NOT NULL");
+	
+		
+		inputProcessor.alterTable("ALTER TABLE Student DROP COLUMN D");
+		inputProcessor.alterTable("ALTER TABLE Student DROP COLUMN C");
+	    
+		inputProcessor.alterTable("ALTER TABLE Student ADD COLUMN C INTEGER NOT NULL");
+		inputProcessor.alterTable("ALTER TABLE Student ADD CONSTRAINT FK_Student FOREIGN KEY (C) REFERENCES Department(C) on DELETE CASCADE;");
+
+		inputProcessor.alterTable("ALTER TABLE Student DROP COLUMN R");
+		inputProcessor.alterTable("ALTER TABLE Student ADD COLUMN R INTEGER NOT NULL");
+		inputProcessor.alterTable("ALTER TABLE Student ADD CONSTRAINT PK_Student PRIMARY KEY(R);");
+        System.out.println(studentTable.describeTable());
+		
+		//studentTable.printTuples();
+		//System.out.println(studentTable.describeTable());
+		
 	}
+	
+	
+	
 
 }

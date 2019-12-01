@@ -15,6 +15,10 @@ public class Tuple implements Comparable<Tuple> {
 	public void addColumn(Column col) {
 		values.put(col.getName(), col);
 	}
+	
+	public void dropColumn(Column col){
+	   values.remove(col.getName());	
+	}
 
 	public void setKeyValue(String key) {
 		this.keyValue = key;

@@ -1,6 +1,7 @@
 package edu.ccny.db.project;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Hashtable;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -23,7 +24,7 @@ public class Table {
 	private Set<Character> primaryKey;
 	private String primaryKeyName;
 	private ForeignKey foreignKey;
-	public Map<Character, Column> columns = new LinkedHashMap<Character, Column>();
+	public  Map<Character, Column> columns = new LinkedHashMap<Character, Column>();
 	private Map<String, Tuple> tuples = new Hashtable<>();
 	private StringBuilder primaryKeyValuebuilder = new StringBuilder();
 
@@ -37,17 +38,20 @@ public class Table {
 
 	public void addColumn(Character colName, String type) {
 		if (columns.containsKey(colName)) {
-			System.err
-					.println(String.format("Already contains this name in table [%s]. Please check your values", name));
+			System.err.println(
+					String.format("Already contains this Column name in table [%s]. Please check your values", name));
 			return;
 		}
 
 		Datatype type1 = Datatype.getValueOf(type);
 		Column colObj = new Column(colName, type1);
 		columns.put(colName, colObj);
+		
+		for(Tuple tupe:tuples.values()){
+			tupe.addColumn(colObj);
+		}
 	}
 
-	
 	public void addForeignKey(ForeignKey foreignKey) {
 		this.foreignKey = foreignKey;
 		this.foreignKey.getTable().addTableDependOnMe(this);
@@ -60,7 +64,7 @@ public class Table {
 	public void addTableDependOnMe(Table table) {
 		this.tablesDependOnMe.add(table);
 	}
-	
+
 	public String getPrimaryKeyName() {
 		return primaryKeyName;
 	}
@@ -104,6 +108,42 @@ public class Table {
 			return false;
 		}
 		return true;
+	}
+
+	/**
+	 * 
+	 * @param charAt
+	 * @throws Exception 
+	 */
+	public void removeColumn(char column) throws Exception {
+		
+		// remove  from columns
+		Column removedColumn = columns.remove(column);
+		if(removedColumn == null){
+			throw new Exception(String.format("Column[%s] is found ", column));
+		}
+
+		// remove all constraints
+		List<Constraint> constraintList = constraints.remove(column);
+		for(Constraint constraint: constraintList){
+			constrainsMap.remove(constraint.getName());
+		}
+		
+		if(foreignKey.getKey().contains(column)){
+			System.err.println(String.format("Removing foreign key as foreignkey depends on Column[%s] ", column));
+			foreignKey = null;
+		}
+		
+		if(primaryKey.contains(column)){
+			System.err.println(String.format("Removing primaryKey as primaryKey depends on Column[%s] ", column));
+			primaryKey = null;
+			primaryKeyName = null;
+		}
+		
+		// remove from tuples
+		for(Tuple tupe:tuples.values()){
+			tupe.dropColumn(removedColumn);
+		}
 	}
 
 	/**
@@ -289,6 +329,11 @@ public class Table {
 	public boolean isTupleExist(String keyValue) {
 		return tuples.containsKey(keyValue);
 	}
+	
+	public boolean isValidColumn(Character ch) {
+		return columns.containsKey(ch);
+		
+	}
 
 	public void delete(String keyValue) {
 		// first delete from this table
@@ -366,6 +411,7 @@ public class Table {
 		return tuples;
 	}
 
+
 	public void update(Character ch, String value) {
 		for (Tuple tuple : tuples.values()) {
 			tuple.setValue(ch, value);
@@ -390,27 +436,29 @@ public class Table {
 		return "Table [name=" + name + ", primaryKey=" + primaryKey + ", foreignKey=" + foreignKey + ", columns="
 				+ columns + ", tuples=" + tuples + ", constraints=" + constraints + "]";
 	}
-	
-	
-	public String describeTable(){
+
+	public String describeTable() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(String.format("---------------Table Name:%s-----------------------------\n", name));
 		sb.append(String.format("---------------List of Columns--------------------------\n", name));
-		for(Column column:columns.values()){
-			sb.append(column.printableFormat()+"\n");
+		for (Column column : columns.values()) {
+			sb.append(column.printableFormat() + "\n");
 		}
 		sb.append("\n");
 		sb.append(String.format("Primary key:%s , name: %s\n", primaryKey, primaryKeyName));
-		if(foreignKey != null){
-			sb.append(String.format("foreignKey key:%s , name: %s , reference table: %s on Delete: %s\n", 
-					foreignKey.getKey(), foreignKey.getName(),foreignKey.getTable().getName(), foreignKey.getAction()));	
+		if (foreignKey != null) {
+			sb.append(String.format("foreignKey key:%s , name: %s , reference table: %s on Delete: %s\n",
+					foreignKey.getKey(), foreignKey.getName(), foreignKey.getTable().getName(),
+					foreignKey.getAction()));
 		}
 		sb.append(String.format("--------------------------List of Constraint-----------------------------\n", name));
-		for(Constraint  constraint:constrainsMap.values()){
+		for (Constraint constraint : constrainsMap.values()) {
 			sb.append(constraint).append("\n");
 		}
 		sb.append("\n");
 		return sb.toString();
 	}
+
+
 
 }

@@ -6,6 +6,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import edu.ccny.db.assignment.SetUtil;
@@ -27,6 +28,21 @@ public class DBOperator implements DBService {
 	@Override
 	public Table getTable(String tableName) {
 		return tables.get(tableName.toLowerCase());
+	}
+
+	@Override
+	public Set<Tuple> select(String tableName) {
+		Set<Tuple> tuples = null;
+		try {
+			Table table = tables.get(tableName.toLowerCase());
+			tuples = table.getTuples().values().stream().collect(Collectors.toSet());
+			return tuples;
+		} catch (Exception ex) {
+			System.err.println(
+					String.format("Failed to execute SELECT operation on Table[%s]. Check your params", tableName));
+		}
+
+		return tuples;
 	}
 
 	/*
@@ -61,6 +77,12 @@ public class DBOperator implements DBService {
 		return tuple.getValue(ch);
 	}
 
+	public List<Tuple> selectWithGroupBy(List<Tuple> tuples, Set<Character> groupBy) {
+		Map<String, List<Tuple>> map = tuples.stream()
+				.collect(Collectors.groupingBy(p -> getGroupingByKey(p, groupBy), Collectors.toList()));
+		return map.values().stream().flatMap(x -> x.stream()).collect(Collectors.toList());
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -68,13 +90,14 @@ public class DBOperator implements DBService {
 	 * java.util.Set)
 	 */
 	@Override
-	public Map<String, List<Tuple>> groupBy(String tableName, Set<Character> groupBy) {
+	public List<Tuple> selectWithGroupBy(String tableName, Set<Character> groupBy) {
 		try {
 			Table table = tables.get(tableName.toLowerCase());
 
 			Map<String, List<Tuple>> map = table.getTuples().values().stream()
 					.collect(Collectors.groupingBy(p -> getGroupingByKey(p, groupBy), Collectors.toList()));
-			return map;
+
+			return map.values().stream().flatMap(x -> x.stream()).collect(Collectors.toList());
 		} catch (Exception ex) {
 			System.err.println(
 					String.format("Failed to execute GROUPBY operation on Table[%s]. Check your params", tableName));
@@ -251,6 +274,31 @@ public class DBOperator implements DBService {
 		} catch (Exception e) {
 			System.err.println("Failed to execute DIFFERENCE operation. Check your params");
 			return null;
+		}
+	}
+
+	@Override
+	public void printJoinTuples(List<JoinTuple> tuples) {
+		boolean isFirstTuple = true;
+		for (JoinTuple joinTule : tuples) {
+			if (isFirstTuple) {
+				System.out.println(joinTule.getHeaderString());
+				isFirstTuple = false;
+			}
+			System.out.println(joinTule.getStringValues());
+		}
+
+	}
+
+	@Override
+	public void printTuples(List<Tuple> tuples) {
+		boolean isFirstTuple = true;
+		for (Tuple tuple : tuples) {
+			if (isFirstTuple) {
+				System.out.println(tuple.getHeaderString());
+				isFirstTuple = false;
+			}
+			System.out.println(tuple.getStringValues());
 		}
 	}
 
