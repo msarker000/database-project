@@ -130,5 +130,12 @@ public interface DBService {
 	
 	
 	List<Tuple> selectWithGroupBy(List<Tuple> tuples, Set<Character> groupBy);
+	
+	
+	void delete(String tableName);
+	
+	
+	void delete(String tableName, Condition condition);
+	
 
 }

@@ -334,20 +334,30 @@ public class Table {
 		return columns.containsKey(ch);
 		
 	}
+	
+	
+	public void deleteAll(){
+	   List<String>  keys= 	tuples.keySet().stream().collect(Collectors.toList());
+		for(String keyValue: keys){
+			delete(keyValue);
+		}
+	}
+	
 
 	public void delete(String keyValue) {
 		// first delete from this table
-		deleteEntryFromTable(this, keyValue);
+		Tuple tuple = deleteEntryFromTable(this, keyValue);
+		String foreignKeyValue = tuple.getValue(foreignKey.getKey());
 
 		// update dependent table based their DELETE_ACTION
 		for (Table eachTable : tablesDependOnMe) {
 			switch (eachTable.foreignKey.getAction()) {
 			case CASCADE:
-				deleteAllEntryFromTableByForeignKey(eachTable, keyValue);
+				deleteAllEntryFromTableByForeignKey(eachTable, foreignKeyValue);
 				break;
 			case SET_NULL:
 				// set null all the entry dependend this tuple
-				setNullToAllEntryFromTableByForeignKey(eachTable, keyValue);
+				setNullToAllEntryFromTableByForeignKey(eachTable, foreignKeyValue);
 				break;
 			case NO_ACTION:
 				// Do nothing
@@ -387,11 +397,12 @@ public class Table {
 		}
 	}
 
-	private void deleteEntryFromTable(Table table, String keyValue) {
+	private Tuple deleteEntryFromTable(Table table, String keyValue) {
 		Tuple tuple = table.tuples.remove(keyValue);
 		if (tuple == null) {
 			System.err.println(String.format("Failed to delete from %s for key %s", name, keyValue));
 		}
+		return tuple;
 	}
 
 	public String getName() {

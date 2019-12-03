@@ -242,9 +242,26 @@ public class InputProcessor {
 		return new ArrayList<>();
 	}
 	
-	
-	public List<JoinTuple> selectJoinTable(String string) {
+	public void deleteFromTable(String deleteStr) {
 		// TODO Auto-generated method stub
+
+		/// DELETE  FROM students
+		if (deleteStr.toUpperCase().contains("DELETE") && !deleteStr.toUpperCase().contains(WHERE)) {
+			String tableName = findTableNameFromDeleteStr(deleteStr);
+			dbService.delete(tableName);
+		}
+		
+	}
+	
+	public List<JoinTuple> selectJoinTable(String joinString) {
+			if(joinString.toUpperCase().contains("UNION")){
+				//TODO do union
+			}else if(joinString.toUpperCase().contains("INTERSECTION")){
+				//TODO do INTERSECTION
+			}else if(joinString.toUpperCase().contains("DIFFERENCE")){
+				//TODO DIFFERENCE
+			}
+		
 		
 		return new ArrayList<>();
 	}
@@ -321,6 +338,12 @@ public class InputProcessor {
 	private String findTableNameFromSelectStr(String selcetStr) {
 		// SELECT * FROM users WHERE city='new york'
 		String tableName = selcetStr.split("\\s+")[3];
+		return tableName;
+	}
+	
+	private String findTableNameFromDeleteStr(String selcetStr) {
+		// DELEET FROM users
+		String tableName = selcetStr.split("\\s+")[2];
 		return tableName;
 	}
 

@@ -276,6 +276,24 @@ public class DBOperator implements DBService {
 			return null;
 		}
 	}
+	
+	
+	@Override
+	public void delete(String tableName) {
+		try{
+			Table table = tables.get(tableName.toLowerCase());
+			table.deleteAll();
+		}catch (Exception e) {
+			System.err.println("Failed to execute DELETE operation. Check your params");
+		}
+			
+	}
+	
+	// only work on key
+	@Override
+	public void delete(String tableName, Condition condition) {
+		// TODO Auto-generated method stub	
+	}
 
 	@Override
 	public void printJoinTuples(List<JoinTuple> tuples) {
