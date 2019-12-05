@@ -1,6 +1,7 @@
 package edu.ccny.db.project;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -11,6 +12,8 @@ import edu.ccny.db.project.DBService.LOGICAL;
 
 public class InputProcessor {
 
+	private static final String ON = "ON";
+	private static final String FROM = "FROM";
 	private static final String GROUPBY = "GROUPBY";
 	private static final String WHERE = "WHERE";
 	private static final String DROP_COLUMN = "DROP COLUMN";
@@ -216,7 +219,6 @@ public class InputProcessor {
 				logicType = LOGICAL.AND;
 			}
 			return dbService.select(tableName, conditions, logicType).stream().collect(Collectors.toList());
-
 		}
 
 		// SELECT * FROM students WHERE A >= 30 AND A <= 60" GROUPBY(A, C) ;
@@ -241,29 +243,84 @@ public class InputProcessor {
 		}
 		return new ArrayList<>();
 	}
-	
-	public void deleteFromTable(String deleteStr) {
-		// TODO Auto-generated method stub
 
-		/// DELETE  FROM students
+	public void deleteFromTable(String deleteStr) {
+
+		/// DELETE FROM students
 		if (deleteStr.toUpperCase().contains("DELETE") && !deleteStr.toUpperCase().contains(WHERE)) {
 			String tableName = findTableNameFromDeleteStr(deleteStr);
 			dbService.delete(tableName);
 		}
-		
-	}
-	
-	public List<JoinTuple> selectJoinTable(String joinString) {
-			if(joinString.toUpperCase().contains("UNION")){
-				//TODO do union
-			}else if(joinString.toUpperCase().contains("INTERSECTION")){
-				//TODO do INTERSECTION
-			}else if(joinString.toUpperCase().contains("DIFFERENCE")){
-				//TODO DIFFERENCE
+		// DELETE FROM students WHERE A >= 30 AND A <= 60"
+		else if (deleteStr.toUpperCase().contains("DELETE") && deleteStr.toUpperCase().contains(WHERE)) {
+			System.out.println(deleteStr);
+			String tableName = findTableNameFromDeleteStr(deleteStr);
+			String conditionalStr = deleteStr.substring(deleteStr.indexOf(WHERE) + WHERE.length() + 1);
+			List<Condition> conditions = getConditionsFromInputString(conditionalStr);
+			LOGICAL logicType = LOGICAL.OR;
+			if (conditionalStr.contains("AND") || conditionalStr.contains("and")) {
+				logicType = LOGICAL.AND;
 			}
+			dbService.delete(tableName, conditions, logicType);
+		}
+
+	}
+
+	// ( SELECT * FROM students WHERE A <= 40 ) UNION ( SELECT * FROM students
+	// WHERE C == 1001 )
+	public Set<Tuple> selectSetQueryTable(String setOptString) {
+		String firstPart = setOptString.substring(setOptString.indexOf("(") + 1, setOptString.indexOf(")")).trim();
+		String secondPart = setOptString.substring(setOptString.lastIndexOf("(") + 1, setOptString.lastIndexOf(")"))
+				.trim();
+
+		Set<Tuple> tuples1 = selectFromTable(firstPart).stream().collect(Collectors.toSet());
+		Set<Tuple> tuples2 = selectFromTable(secondPart).stream().collect(Collectors.toSet());
+
+		if (setOptString.toUpperCase().contains("UNION")) {
+			return dbService.union(tuples1, tuples2);
+		} else if (setOptString.toUpperCase().contains("INTERSECTION")) {
+			return dbService.intersection(tuples1, tuples2);
+		} else if (setOptString.toUpperCase().contains("DIFFERENCE")) {
+			return dbService.difference(tuples1, tuples2);
+		}
+
+		return new HashSet<>();
+	}
+
+	public Set<JoinTuple> selectJoinTable(String joinQuery) {
+
+		if (joinQuery.toUpperCase().contains("NATURALJOIN")) {
+			/// SELECT * FROM table1 NATURALJOIN table2
+			String[] strs = joinQuery.trim().split(" ");
+			String tableName1 = strs[3];
+			String tableName2 = strs[5];
+
+			return dbService.naturalJoin(tableName1, tableName2);
+
+		} else if (joinQuery.toUpperCase().contains("CROSSJOIN")) {
 		
-		
-		return new ArrayList<>();
+			/// SELECT * FROM table1 CROSSJOIN table2
+			String[] strs = joinQuery.trim().split(" ");
+			String tableName1 = strs[3];
+			String tableName2 = strs[5];
+			return dbService.crossJoin(tableName1, tableName2);
+		} else if (joinQuery.toUpperCase().contains("JOIN")) {
+			// SELECT * FROM table1 JOIN table2 ON table1.A = table2.C
+			String[] strs = joinQuery.trim().split(" ");
+			String tableName1 = strs[3];
+			String tableName2 = strs[5];
+
+			Table table1 = dbService.getTable(tableName1);
+			Table table2 = dbService.getTable(tableName2);
+			char firstCond = strs[7].charAt(strs[7].length() - 1);
+			char secondCond = strs[9].charAt(strs[9].length() - 1);
+
+			JoinCondition joinCondition = new JoinCondition(table1.getColumn(firstCond), table2.getColumn(secondCond));
+			return dbService.join(tableName1, tableName2, joinCondition);
+
+		}
+
+		return new HashSet<>();
 	}
 
 	private List<Condition> getConditionsFromInputString(String conditionalStr) {
@@ -340,13 +397,11 @@ public class InputProcessor {
 		String tableName = selcetStr.split("\\s+")[3];
 		return tableName;
 	}
-	
+
 	private String findTableNameFromDeleteStr(String selcetStr) {
 		// DELEET FROM users
 		String tableName = selcetStr.split("\\s+")[2];
 		return tableName;
 	}
-
-	
 
 }

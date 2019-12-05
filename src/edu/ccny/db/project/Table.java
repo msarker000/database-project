@@ -24,7 +24,7 @@ public class Table {
 	private Set<Character> primaryKey;
 	private String primaryKeyName;
 	private ForeignKey foreignKey;
-	public  Map<Character, Column> columns = new LinkedHashMap<Character, Column>();
+	public Map<Character, Column> columns = new LinkedHashMap<Character, Column>();
 	private Map<String, Tuple> tuples = new Hashtable<>();
 	private StringBuilder primaryKeyValuebuilder = new StringBuilder();
 
@@ -46,8 +46,8 @@ public class Table {
 		Datatype type1 = Datatype.getValueOf(type);
 		Column colObj = new Column(colName, type1);
 		columns.put(colName, colObj);
-		
-		for(Tuple tupe:tuples.values()){
+
+		for (Tuple tupe : tuples.values()) {
 			tupe.addColumn(colObj);
 		}
 	}
@@ -113,35 +113,35 @@ public class Table {
 	/**
 	 * 
 	 * @param charAt
-	 * @throws Exception 
+	 * @throws Exception
 	 */
 	public void removeColumn(char column) throws Exception {
-		
-		// remove  from columns
+
+		// remove from columns
 		Column removedColumn = columns.remove(column);
-		if(removedColumn == null){
+		if (removedColumn == null) {
 			throw new Exception(String.format("Column[%s] is found ", column));
 		}
 
 		// remove all constraints
 		List<Constraint> constraintList = constraints.remove(column);
-		for(Constraint constraint: constraintList){
+		for (Constraint constraint : constraintList) {
 			constrainsMap.remove(constraint.getName());
 		}
-		
-		if(foreignKey.getKey().contains(column)){
+
+		if (foreignKey.getKey().contains(column)) {
 			System.err.println(String.format("Removing foreign key as foreignkey depends on Column[%s] ", column));
 			foreignKey = null;
 		}
-		
-		if(primaryKey.contains(column)){
+
+		if (primaryKey.contains(column)) {
 			System.err.println(String.format("Removing primaryKey as primaryKey depends on Column[%s] ", column));
 			primaryKey = null;
 			primaryKeyName = null;
 		}
-		
+
 		// remove from tuples
-		for(Tuple tupe:tuples.values()){
+		for (Tuple tupe : tuples.values()) {
 			tupe.dropColumn(removedColumn);
 		}
 	}
@@ -329,35 +329,48 @@ public class Table {
 	public boolean isTupleExist(String keyValue) {
 		return tuples.containsKey(keyValue);
 	}
-	
+
 	public boolean isValidColumn(Character ch) {
 		return columns.containsKey(ch);
-		
+
 	}
-	
-	
-	public void deleteAll(){
-	   List<String>  keys= 	tuples.keySet().stream().collect(Collectors.toList());
-		for(String keyValue: keys){
+
+	public void deleteAll() {
+		List<String> keys = tuples.keySet().stream().collect(Collectors.toList());
+		for (String keyValue : keys) {
+			delete(keyValue);
+		}
+	}
+
+	public void delete(Set<Tuple> tuples) {
+		Set<String> keyValues = tuples.stream().map(x -> x.getKeyValue()).collect(Collectors.toSet());
+		for (String keyValue : keyValues) {
 			delete(keyValue);
 		}
 	}
 	
+	public void delete(Tuple tuple) {
+			delete(tuple.getKeyValue());
+	}
 
+	/**
+	 * delete only using primary key
+	 * 
+	 * @param keyValue
+	 */
 	public void delete(String keyValue) {
 		// first delete from this table
-		Tuple tuple = deleteEntryFromTable(this, keyValue);
-		String foreignKeyValue = tuple.getValue(foreignKey.getKey());
+		deleteEntryFromTable(this, keyValue);
 
 		// update dependent table based their DELETE_ACTION
 		for (Table eachTable : tablesDependOnMe) {
 			switch (eachTable.foreignKey.getAction()) {
 			case CASCADE:
-				deleteAllEntryFromTableByForeignKey(eachTable, foreignKeyValue);
+				deleteAllEntryFromTableByForeignKey(eachTable, keyValue);
 				break;
 			case SET_NULL:
 				// set null all the entry dependend this tuple
-				setNullToAllEntryFromTableByForeignKey(eachTable, foreignKeyValue);
+				setNullToAllEntryFromTableByForeignKey(eachTable, keyValue);
 				break;
 			case NO_ACTION:
 				// Do nothing
@@ -422,7 +435,6 @@ public class Table {
 		return tuples;
 	}
 
-
 	public void update(Character ch, String value) {
 		for (Tuple tuple : tuples.values()) {
 			tuple.setValue(ch, value);
@@ -469,7 +481,5 @@ public class Table {
 		sb.append("\n");
 		return sb.toString();
 	}
-
-
 
 }

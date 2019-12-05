@@ -276,23 +276,23 @@ public class DBOperator implements DBService {
 			return null;
 		}
 	}
-	
-	
+
 	@Override
 	public void delete(String tableName) {
-		try{
+		try {
 			Table table = tables.get(tableName.toLowerCase());
 			table.deleteAll();
-		}catch (Exception e) {
+		} catch (Exception e) {
 			System.err.println("Failed to execute DELETE operation. Check your params");
 		}
-			
+
 	}
-	
-	// only work on key
+
 	@Override
-	public void delete(String tableName, Condition condition) {
-		// TODO Auto-generated method stub	
+	public void delete(String tableName, List<Condition> conditions, LOGICAL logicType) {
+		Table table = tables.get(tableName.toLowerCase());
+		Set<Tuple> tuples = select(tableName, conditions, logicType);
+		table.delete(tuples);
 	}
 
 	@Override
@@ -308,6 +308,21 @@ public class DBOperator implements DBService {
 
 	}
 
+	@Override
+	public void printTable(String tableName) {
+		Table table = getTable(tableName);
+		List<Tuple> tuples = table.getTuples().values().stream().collect(Collectors.toList());
+		printTuples(tuples);
+
+	}
+
+	
+	@Override
+	public void printTuples(Set<Tuple> tuples) {
+		printTuples(tuples.stream().collect(Collectors.toList()));
+		
+	}
+	
 	@Override
 	public void printTuples(List<Tuple> tuples) {
 		boolean isFirstTuple = true;

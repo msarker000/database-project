@@ -1,16 +1,22 @@
 package edu.ccny.test;
 
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
+
 import org.junit.Test;
 
 import edu.ccny.db.project.DBOperator;
 import edu.ccny.db.project.DBService;
 import edu.ccny.db.project.InputProcessor;
+import edu.ccny.db.project.JoinTuple;
+import edu.ccny.db.project.Tuple;
 
-public class inputProcessorJoinQueryTest {
+public class inputProcessorJoinTest {
 
-	
 	@Test
-	public void testJoin() throws Exception{
+	public void testJoin() throws Exception {
 		DBService dbService = new DBOperator();
 		InputProcessor inputProcessor = new InputProcessor(dbService);
 		// department table
@@ -36,11 +42,20 @@ public class inputProcessorJoinQueryTest {
 		inputProcessor.insertIntoTable("INSERT INTO Students VALUES('mikcle', '32', '105', '1001');");
 		inputProcessor.insertIntoTable("INSERT INTO Students VALUES('mike pnce', '32', '106', '1004');");
 		inputProcessor.insertIntoTable("INSERT INTO Students VALUES('Jhone Jay', '35', '107', '1001');");
+		inputProcessor.insertIntoTable("INSERT INTO Students VALUES('GD', '50', '112', '1001');");
 		inputProcessor.insertIntoTable("INSERT INTO Students VALUES('Hoe', '65', '108', '1004');");
 		inputProcessor.insertIntoTable("INSERT INTO Students VALUES('Woe', '25', '109', '1001');");
 		inputProcessor.insertIntoTable("INSERT INTO Students VALUES('Manny', '66', '111', '1003');");
 		
-		inputProcessor.selectJoinTable("");	
+		
+		Set<JoinTuple> list= inputProcessor.selectJoinTable("SELECT * FROM Students JOIN Departments ON Students.C = Departments.C");
+		
+		list= inputProcessor.selectJoinTable("SELECT * FROM Students NATURALJOIN Departments");
+		
+		list= inputProcessor.selectJoinTable("SELECT * FROM Students CROSSJOIN Departments");
+		
+		
+		dbService.printJoinTuples(list.stream().collect(Collectors.toList()));
 	
 	}
 }

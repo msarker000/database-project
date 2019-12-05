@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import edu.ccny.db.project.DBService.LOGICAL;
+
 public interface DBService {
 
 	enum LOGICAL {
@@ -125,6 +127,10 @@ public interface DBService {
 	
 	void printTuples(List<Tuple> tuples);
 	
+	void printTuples(Set<Tuple> tuples);
+	
+	void printTable(String tableName);
+	
 	
 	void printJoinTuples(List<JoinTuple> tuples);
 	
@@ -134,8 +140,9 @@ public interface DBService {
 	
 	void delete(String tableName);
 	
-	
-	void delete(String tableName, Condition condition);
+
+
+	void delete(String tableName, List<Condition> conditions, LOGICAL logicType);
 	
 
 }

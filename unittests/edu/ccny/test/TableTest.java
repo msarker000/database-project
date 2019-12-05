@@ -76,11 +76,18 @@ public class TableTest {
 		assertEquals(5, studentTable.getTuples().values().size());
 		assertEquals(4, departmentTable.getTuples().values().size());
 		studentTable.printTuples();
+		departmentTable.printTuples();
+		
 		foreignKey.setAction(DeleteAction.SET_NULL);
-
 		departmentTable.delete("1002");
+		
 		assertEquals(3, departmentTable.getTuples().values().size());
 		assertEquals(5, studentTable.getTuples().values().size());
+		studentTable.printTuples();
+		departmentTable.printTuples();
+		
+		studentTable.delete("101");
+		
 		studentTable.printTuples();
 	}
 
