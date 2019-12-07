@@ -319,6 +319,19 @@ public class DBOperator implements DBService {
 		}
 
 	}
+	
+	@Override
+	public void printJoinTuples(Set<JoinTuple> tuples) {
+		boolean isFirstTuple = true;
+		for (JoinTuple joinTule : tuples) {
+			if (isFirstTuple) {
+				System.out.println(joinTule.getHeaderString());
+				isFirstTuple = false;
+			}
+			System.out.println(joinTule.getStringValues());
+		}
+
+	}
 
 	@Override
 	public void printTable(String tableName) {

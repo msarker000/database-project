@@ -67,25 +67,6 @@ public class InputProcessor {
 		}
 	}
 	
-	
-	
-
-	private void addColumnAndConstraintFromColumnStr(String tableName, Table table, String columnStr) {
-		String[] colParts = columnStr.trim().toUpperCase().split("\\s+");
-		Character colCh = colParts[0].charAt(0);
-		String dataType = colParts[1];
-		table.addColumn(colCh, dataType);
-		if (colParts.length == 4) {
-			if (colParts[2].concat(colParts[3]).equals(NOTNULL)) {
-				table.addConstrain(new Constraint(colCh, Operator.NOT_EQUAL, null, colParts[0].concat("_" + NOTNULL)));
-			}
-			if (colParts[2].concat(colParts[3]).equals(PRIMARYKEY)) {
-				Set<Character> primaryKey = new LinkedHashSet<>();
-				primaryKey.add(colCh);
-				table.addPrimaryKey(primaryKey, "PK_" + tableName);
-			}
-		}
-	}
 
 	public void alterTable(String alterTablestr) throws Exception {
 		String tableName = findTableNameFromAlterTableStr(alterTablestr);
@@ -169,7 +150,23 @@ public class InputProcessor {
 			addCheckConstraint(alterTablestr, table, constrainName);
 		}
 	}
-
+	
+	private void addColumnAndConstraintFromColumnStr(String tableName, Table table, String columnStr) {
+		String[] colParts = columnStr.trim().toUpperCase().split("\\s+");
+		Character colCh = colParts[0].charAt(0);
+		String dataType = colParts[1];
+		table.addColumn(colCh, dataType);
+		if (colParts.length == 4) {
+			if (colParts[2].concat(colParts[3]).equals(NOTNULL)) {
+				table.addConstrain(new Constraint(colCh, Operator.NOT_EQUAL, null, colParts[0].concat("_" + NOTNULL)));
+			}
+			if (colParts[2].concat(colParts[3]).equals(PRIMARYKEY)) {
+				Set<Character> primaryKey = new LinkedHashSet<>();
+				primaryKey.add(colCh);
+				table.addPrimaryKey(primaryKey, "PK_" + tableName);
+			}
+		}
+	}
 	private void dropFDFromTable(Table table, String alterTablestr) {
 		String fdString = alterTablestr.substring(alterTablestr.indexOf("(") + 1, alterTablestr.indexOf(")")).trim();
 		String[] fdStrs = fdString.replace(" ", "").split(",");

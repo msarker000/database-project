@@ -32,8 +32,6 @@ public class InputProcessorCREATEDROPTableTest {
 		table = dbService.getTable("Departments");
 		assertEquals(null, table);
 		
-		
-		
 	}
 
 }

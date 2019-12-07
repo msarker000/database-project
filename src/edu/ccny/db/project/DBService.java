@@ -136,8 +136,9 @@ public interface DBService {
 	
 	void printTable(String tableName);
 	
-	
 	void printJoinTuples(List<JoinTuple> tuples);
+	
+	void printJoinTuples(Set<JoinTuple> tuples);
 	
 	
 	List<Tuple> selectWithGroupBy(List<Tuple> tuples, Set<Character> groupBy);
