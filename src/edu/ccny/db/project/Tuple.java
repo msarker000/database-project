@@ -12,6 +12,7 @@ public class Tuple implements Comparable<Tuple> {
 	private StringBuilder builder = new StringBuilder();
 	private Map<Character, Column> values = new LinkedHashMap<Character, Column>();
 
+
 	public void addColumn(Column col) {
 		values.put(col.getName(), col);
 	}

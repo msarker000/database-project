@@ -1,15 +1,15 @@
 package edu.ccny.db.project;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Hashtable;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.omg.CORBA.portable.ValueInputStream;
+import edu.ccny.db.assignment.FunctionDependency;
 
 /**
  * This class present table in with all kind if operation insert, update, delete
@@ -27,10 +27,19 @@ public class Table {
 	public Map<Character, Column> columns = new LinkedHashMap<Character, Column>();
 	private Map<String, Tuple> tuples = new Hashtable<>();
 	private StringBuilder primaryKeyValuebuilder = new StringBuilder();
+	private Set<Set<Character>> keys = new LinkedHashSet<Set<Character>>();
+	private Set<MVD> mvds = new LinkedHashSet<>();
 
 	private Map<String, Constraint> constrainsMap = new LinkedHashMap<>();
 	private Map<Character, List<Constraint>> constraints = new LinkedHashMap<Character, List<Constraint>>();
 	private List<Table> tablesDependOnMe = new ArrayList<>();
+
+	private Set<FD> convertedNonTrivialFDs = new LinkedHashSet<FD>();
+
+	// Original set of valid user entered functional dependencies
+	private Set<FD> originalFDs = new LinkedHashSet<FD>();
+
+	private NormalForm normalForm = NormalForm.NONE;
 
 	public Table(String name) {
 		this.name = name;
@@ -348,9 +357,9 @@ public class Table {
 			delete(keyValue);
 		}
 	}
-	
+
 	public void delete(Tuple tuple) {
-			delete(tuple.getKeyValue());
+		delete(tuple.getKeyValue());
 	}
 
 	/**
@@ -454,6 +463,88 @@ public class Table {
 		}
 	}
 
+	public void addFD(Set<Character> lhsOfFD, Set<Character> rhsOfFD) {
+		originalFDs.add(new FD(lhsOfFD, rhsOfFD));
+		if (rhsOfFD.size() > 1) {
+			// it is not in standard non-trivial form, need to convert
+			// non-trival form
+			for (Character ch : rhsOfFD) {
+				convertedNonTrivialFDs.add(new FD(lhsOfFD, ch));
+			}
+		} else {
+			// it is in standard non-trivial form
+			convertedNonTrivialFDs.add(new FD(lhsOfFD, rhsOfFD));
+		}
+	}
+	
+	public void addMVD(Set<Character> lhsOfFD, Set<Character> rhsOfFD) {
+		mvds.add(new MVD(lhsOfFD, rhsOfFD));
+	}
+	
+	public void dropMVD(FD fd) {
+		mvds.remove(fd);
+	}
+	
+	public void dropFD(FD fd) {
+		originalFDs.remove(fd);
+		if (fd.getAttributesOfRhsOfFD().size() > 1) {
+			// it is not in standard non-trivial form, need to convert
+			// non-trival form
+			for (Character ch : fd.getAttributesOfRhsOfFD()) {
+				convertedNonTrivialFDs.remove(new FD(fd.getAttributesOfLhsOfFD(), ch));
+			}
+		} else {
+			// it is in standard non-trivial form
+			convertedNonTrivialFDs.remove(fd);
+		}
+	}
+	
+	public boolean isExistFD(Set<Character> lhsOfFD, Set<Character> rhsOfFD) {
+		FD fd = new FD(lhsOfFD, rhsOfFD);
+		if(originalFDs.contains(fd)){
+			return true;
+		}
+		if (fd.getAttributesOfRhsOfFD().size() > 1) {
+			// it is not in standard non-trivial form, need to convert
+			// non-trival form
+			for (Character ch : fd.getAttributesOfRhsOfFD()) {
+				if(convertedNonTrivialFDs.contains(new FD(fd.getAttributesOfLhsOfFD(), ch))){
+					return true;
+				}
+			}
+		} 
+		return false;
+	}
+	
+	public Set<MVD> getMvds() {
+		return mvds;
+	}
+
+	public void setNormalForm(NormalForm normalForm) {
+		this.normalForm = normalForm;
+	}
+
+	public Set<Set<Character>> getKeys() {
+		return keys;
+	}
+
+	public Set<FD> getOriginalFDs() {
+		return originalFDs;
+	}
+
+	public Set<FD> getConvertedNonTrivialFDs() {
+		return convertedNonTrivialFDs;
+	}
+
+	public Set<Character> getAttributes() {
+		return columns.entrySet().stream().map(x -> x.getKey()).collect(Collectors.toSet());
+	}
+
+	public void addKey(Set<Character> key) {
+		keys.add(key);
+
+	}
+
 	@Override
 	public String toString() {
 		return "Table [name=" + name + ", primaryKey=" + primaryKey + ", foreignKey=" + foreignKey + ", columns="
@@ -474,12 +565,30 @@ public class Table {
 					foreignKey.getKey(), foreignKey.getName(), foreignKey.getTable().getName(),
 					foreignKey.getAction()));
 		}
-		sb.append(String.format("--------------------------List of Constraint-----------------------------\n", name));
+		sb.append("--------------------------List of Constraint-----------------------------\n");
 		for (Constraint constraint : constrainsMap.values()) {
 			sb.append(constraint).append("\n");
 		}
-		sb.append("\n");
+	
+		sb.append("--------------------------List of FD-----------------------------\n");
+		for (FD fd : convertedNonTrivialFDs) {
+			sb.append(fd.toPrintableFormat()).append("\n");
+		}
+		for (FD fd : mvds) {
+			sb.append(fd.toPrintableFormat()).append("\n");
+		}
+	
+	
+		sb.append("--------------------------List of Suggested Keys-----------------------------\n");
+		for (Set<Character> key : keys) {
+			sb.append(SetUtil.setToString(key)).append("\n");
+		}
+	
+		
+		sb.append("--------------------------NormalForm-----------------------------\n");
+		sb.append(normalForm.getName());
 		return sb.toString();
 	}
+
 
 }

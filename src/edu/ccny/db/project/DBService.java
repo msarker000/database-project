@@ -13,6 +13,11 @@ public interface DBService {
 	}
 
 	void addTable(Table table);
+	
+	void dropTable(String tableName);
+	
+	void showTableList();
+	
 
 	/**
 	 * Selects tuples based on conditions and Logical AND or Condition

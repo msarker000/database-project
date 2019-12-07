@@ -56,6 +56,6 @@ public class inputProcessorJoinTest {
 		
 		
 		dbService.printJoinTuples(list.stream().collect(Collectors.toList()));
-	
+		
 	}
 }

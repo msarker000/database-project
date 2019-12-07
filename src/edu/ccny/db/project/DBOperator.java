@@ -24,10 +24,22 @@ public class DBOperator implements DBService {
 	public void addTable(Table table) {
 		tables.put(table.getName().toLowerCase(), table);
 	}
+	
+	@Override
+	public void dropTable(String tableName) {
+		tables.remove(tableName.toLowerCase());
+	}
 
 	@Override
 	public Table getTable(String tableName) {
 		return tables.get(tableName.toLowerCase());
+	}
+	
+	@Override
+	public void showTableList() {
+		for(Table table: tables.values()){
+			System.out.println(table.getName());
+		}
 	}
 
 	@Override

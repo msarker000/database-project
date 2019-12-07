@@ -1,8 +1,9 @@
-package edu.ccny.db.assignment;
+package edu.ccny.db.project;
 
 
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 /**
  * This class is a utils for all set operations
@@ -113,6 +114,10 @@ public class SetUtil {
 			treeSet.add(ch);
 		}
 		return treeSet;
+	}
+	
+	public static String setToString(Set<Character> characters){
+		return characters.stream().map(ch -> String.valueOf(ch)).collect(Collectors.joining());
 	}
 
 }
