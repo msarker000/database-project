@@ -352,3 +352,11 @@ mike pnce	32	106	1004
 Jhone Jay	35	107	null	
 tamer	30	110	1004	
 SQL>>
+
+
+## find Normal form 
+SQL>> CREATE TABLE Employee(A integer PRIMARY KEY, B string NOT NULL, C string NOT NULL);
+SQL>> ALTER TABLE Employee ADD FD (A->B, B->C);
+SQL>> FIND NF FOR Employee;
+SECOND_NF
+SQL>> 
