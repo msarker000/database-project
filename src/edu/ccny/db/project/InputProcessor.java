@@ -49,31 +49,30 @@ public class InputProcessor {
 		}
 		dbService.addTable(table);
 	}
-	
-	
+
 	public void dropTable(String dropTableStr) {
 		// DROP TABLE table
-		if(dropTableStr.toUpperCase().contains("DROP TABLE")){
+		if (dropTableStr.toUpperCase().contains("DROP TABLE")) {
 			String[] strs = dropTableStr.split(" ");
 			String tableName = strs[2];
-			dbService.dropTable(tableName);	
+			dbService.dropTable(tableName);
 		}
 	}
-	
+
 	public void showTables(String showTablesStr) {
 		// SHOW TABLES
-		if(showTablesStr.toUpperCase().equals("SHOW TABLES")){
+		if (showTablesStr.toUpperCase().equals("SHOW TABLES")) {
 			dbService.showTableList();
 		}
 	}
-	
+
 	public void describeTable(String describeStr) {
 		// DESCIRBE TABLE Students
-		if(describeStr.toUpperCase().contains("DESCRIBE TABLE")){
-			String[] strs = describeStr.split(" "); 
+		if (describeStr.toUpperCase().contains("DESCRIBE TABLE")) {
+			String[] strs = describeStr.split(" ");
 			String tableName = strs[2];
 			Table table = dbService.getTable(tableName);
-			if(table == null){
+			if (table == null) {
 				System.err.println(String.format("[%s] not found", tableName));
 				return;
 			}
@@ -81,7 +80,6 @@ public class InputProcessor {
 			System.out.println(desStr);
 		}
 	}
-	
 
 	public void alterTable(String alterTablestr) throws Exception {
 		String tableName = findTableNameFromAlterTableStr(alterTablestr);
@@ -90,7 +88,7 @@ public class InputProcessor {
 			throw new Exception(String.format("[%s] is not found in database.", tableName));
 		}
 		alterTablestr = alterTablestr.toUpperCase();
-		
+
 		if (alterTablestr.contains(ADD_CONSTRAIN)) {
 			// add constraint to table
 			addConstraintToTable(alterTablestr, table);
@@ -131,13 +129,13 @@ public class InputProcessor {
 				keys.add(SetUtil.setToString(key));
 			}
 		}
-		for(String key : keys){
-			System.out.println("\t "+key);
+		for (String key : keys) {
+			System.out.println("\t " + key);
 		}
 	}
-	
+
 	public void findNormalFromString(String findString) {
-		NormalForm normalForm =findNormalFromForTable(findString);
+		NormalForm normalForm = findNormalFromForTable(findString);
 		System.out.println(normalForm);
 	}
 
@@ -173,7 +171,7 @@ public class InputProcessor {
 			addCheckConstraint(alterTablestr, table, constrainName);
 		}
 	}
-	
+
 	private void addColumnAndConstraintFromColumnStr(String tableName, Table table, String columnStr) {
 		String[] colParts = columnStr.trim().toUpperCase().split("\\s+");
 		Character colCh = colParts[0].charAt(0);
@@ -190,6 +188,7 @@ public class InputProcessor {
 			}
 		}
 	}
+
 	private void dropFDFromTable(Table table, String alterTablestr) {
 		String fdString = alterTablestr.substring(alterTablestr.indexOf("(") + 1, alterTablestr.indexOf(")")).trim();
 		String[] fdStrs = fdString.replace(" ", "").split(",");
@@ -208,14 +207,14 @@ public class InputProcessor {
 				}
 				Set<Character> lhsOfFD = SetUtil.getSetFromString(fdParts[0]);
 				Set<Character> rhsOfFD = SetUtil.getSetFromString(fdParts[1]);
-				if(isMVD){
+				if (isMVD) {
 					MVD fd = new MVD(lhsOfFD, rhsOfFD);
 					table.dropMVD(fd);
-				}else{
+				} else {
 					FD fd = new FD(lhsOfFD, rhsOfFD);
 					table.dropFD(fd);
 				}
-				
+
 			}
 		}
 	}
@@ -265,13 +264,14 @@ public class InputProcessor {
 		// key constraint
 		if (!isRemoved) {
 			ForeignKey foreignKey = table.getForeignKey();
-			if (foreignKey.getName().equalsIgnoreCase(constaintName)) {
+			if (foreignKey != null && foreignKey.getName().equalsIgnoreCase(constaintName)) {
 				table.removeForeignKey();
 			} else if (table.getPrimaryKeyName().equalsIgnoreCase(constaintName)) {
 				table.removePrimaryKey();
 			} else {
 				throw new Exception("Failed to remove constrains.");
 			}
+
 		}
 	}
 
@@ -351,12 +351,11 @@ public class InputProcessor {
 		table.insert(valuesToInsert);
 	}
 
-	public void executeSelectStatement(String slectStr){
+	public void executeSelectStatement(String slectStr) {
 		List<Tuple> tuples = selectFromTable(slectStr);
 		dbService.printTuples(tuples);
 	}
-	
-	
+
 	/**
 	 * select from table
 	 * 
@@ -434,7 +433,6 @@ public class InputProcessor {
 		}
 		// DELETE FROM students WHERE A >= 30 AND A <= 60"
 		else if (deleteStr.toUpperCase().contains("DELETE") && deleteStr.toUpperCase().contains(WHERE)) {
-			System.out.println(deleteStr);
 			String tableName = findTableNameFromDeleteStr(deleteStr);
 			String conditionalStr = deleteStr.substring(deleteStr.indexOf(WHERE) + WHERE.length() + 1);
 			List<Condition> conditions = getConditionsFromInputString(conditionalStr);
@@ -446,8 +444,8 @@ public class InputProcessor {
 		}
 
 	}
-	
-	public void executeSetOperation(String setOpcmd){
+
+	public void executeSetOperation(String setOpcmd) {
 		Set<Tuple> tuples = selectSetQueryTable(setOpcmd);
 		dbService.printTuples(tuples);
 	}
@@ -472,6 +470,7 @@ public class InputProcessor {
 
 		return new HashSet<>();
 	}
+
 	public void executeJoinStatements(String joinQuery) {
 		Set<JoinTuple> joinTuples = selectJoinTable(joinQuery);
 		dbService.printJoinTuples(joinTuples);
@@ -611,8 +610,8 @@ public class InputProcessor {
 			System.err.println("\n Wrong FD[RHS contains attributes not in Relation].");
 			return false;
 		}
-		
-		if(table.isExistFD(lhsOfFD, rhsOfFD)){
+
+		if (table.isExistFD(lhsOfFD, rhsOfFD)) {
 			System.err.println("\n  Wrong FD[Redundant FD. Same FD exist in Relation]");
 			return false;
 		}

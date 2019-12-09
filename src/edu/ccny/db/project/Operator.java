@@ -18,7 +18,11 @@ public enum Operator {
 	}
 
 	public static Operator fromText(String text) {
-		return Arrays.stream(values()).filter(bl -> bl.name.equalsIgnoreCase(text)).findFirst().orElse(null);
+		Operator operator =  Arrays.stream(values()).filter(bl -> bl.name.equalsIgnoreCase(text)).findFirst().orElse(null);
+		if(operator == null || text.equals("=")){
+			operator = Operator.EQUAL;
+		}
+		return operator;
 	}
 
 }

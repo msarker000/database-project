@@ -1,5 +1,354 @@
+####   Data Definition Language(DDL)
+
 ****************************************************************
 ********** Database System I Project Console *******************
 ****************************************************************
-CREATE TABLE Students(A integer PRIMARY KEY, B string NOT NULL, "
-				+ " C string NOT NULL,  D string NOT NULL);
+SQL>> CREATE TABLE Employee(A integer PRIMARY KEY, B string NOT NULL, C string NOT NULL, D string NOT NULL);
+SQL>> CREATE TABLE Students( N string NOT NULL, A integer NOT NULL, R integer  PRIMARY KEY, C integer NOT NULL);
+SQL>> CREATE TABLE Departments(N string NOT NULL, C integer PRIMARY KEY);
+SQL>> SHOW TABLES;
+Students
+Departments
+Employee
+SQL>> ALTER TABLE Departments ADD CONSTRAINT PK_Departments PRIMARY KEY(C);
+SQL>> ALTER TABLE Students ADD CONSTRAINT PK_Students PRIMARY KEY(R);
+SQL>> ALTER TABLE Students ADD CONSTRAINT FK_Students FOREIGN KEY (C) REFERENCES Departments(C) on DELETE CASCADE;
+SQL>> ALTER TABLE Students ADD CONSTRAINT check_id_non_zero CHECK (R > 0);
+SQL>> DESCRIBE TABLE Students;
+---------------Table Name:Students-----------------------------
+---------------List of Columns--------------------------
+name: N, dataType: STRING
+name: A, dataType: INTEGER
+name: R, dataType: INTEGER
+name: C, dataType: INTEGER
+
+Primary key:[R] , name: PK_STUDENTS
+foreignKey key:[C] , name: FK_STUDENTS , reference table: Departments on Delete: CASCADE
+--------------------------List of Constraint-----------------------------
+name: N_NOTNULL  N != null
+name: A_NOTNULL  A != null
+name: C_NOTNULL  C != null
+name: CHECK_ID_NON_ZERO  R > 0
+--------------------------List of FD-----------------------------
+--------------------------List of Suggested Keys-----------------------------
+--------------------------NormalForm-----------------------------
+Not Identified
+SQL>> ALTER TABLE Students DROP CONSTRAINT check_id_non_zero;
+SQL>> ALTER TABLE Students DROP COLUMN C;
+SQL>> Removing foreign key as foreignkey depends on Column[C] 
+ALTER TABLE Students DROP CONSTRAINT PK_Students;
+SQL>> DESCRIBE TABLE Students;
+---------------Table Name:Students-----------------------------
+---------------List of Columns--------------------------
+name: N, dataType: STRING
+name: A, dataType: INTEGER
+name: R, dataType: INTEGER
+
+Primary key:null , name: null
+--------------------------List of Constraint-----------------------------
+name: N_NOTNULL  N != null
+name: A_NOTNULL  A != null
+--------------------------List of FD-----------------------------
+--------------------------List of Suggested Keys-----------------------------
+--------------------------NormalForm-----------------------------
+Not Identified
+SQL>> ALTER TABLE Students ADD COLUMN D INTEGER NOT NULL;
+SQL>> ALTER TABLE Students ADD COLUMN C INTEGER NOT NUL
+Command string should end with semicolone(;)SQL>> 
+ALTER TABLE Students ADD COLUMN C INTEGER NOT NUL;
+SQL>> ALTER TABLE Students ADD CONSTRAINT PK_Students PRIMARY KEY(R);
+SQL>> ALTER TABLE Students ADD CONSTRAINT FK_Students FOREIGN KEY (C) REFERENCES Departments(C) on DELETE CASCADE;
+SQL>> DESCRIBE TABLE Students;
+---------------Table Name:Students-----------------------------
+---------------List of Columns--------------------------
+name: N, dataType: STRING
+name: A, dataType: INTEGER
+name: R, dataType: INTEGER
+name: D, dataType: INTEGER
+name: C, dataType: INTEGER
+
+Primary key:[R] , name: PK_STUDENTS
+foreignKey key:[C] , name: FK_STUDENTS , reference table: Departments on Delete: CASCADE
+--------------------------List of Constraint-----------------------------
+name: N_NOTNULL  N != null
+name: A_NOTNULL  A != null
+name: D_NOTNULL  D != null
+--------------------------List of FD-----------------------------
+--------------------------List of Suggested Keys-----------------------------
+--------------------------NormalForm-----------------------------
+Not Identified
+SQL>> ALTER TABLE Employee ADD FD (AB->C, AB->D, C->A, D->B);
+SQL>> FIND NF FOR Employee;
+THIRD_NF
+SQL>> DESCRIBE TABLE Employee;
+---------------Table Name:Employee-----------------------------
+---------------List of Columns--------------------------
+name: A, dataType: INTEGER
+name: B, dataType: STRING
+name: C, dataType: STRING
+name: D, dataType: STRING
+
+Primary key:[A] , name: PK_Employee
+--------------------------List of Constraint-----------------------------
+name: B_NOTNULL  B != null
+name: C_NOTNULL  C != null
+name: D_NOTNULL  D != null
+--------------------------List of FD-----------------------------
+AB->C
+AB->D
+C->A
+D->B
+--------------------------List of Suggested Keys-----------------------------
+AB
+BC
+AD
+CD
+--------------------------NormalForm-----------------------------
+3NF
+SQL>> DROP TABLE Students;
+SQL>> DROP TABLE Departments
+Command string should end with semicolone(;)
+SQL>> DROP TABLE Departments;
+SQL>> SHOW TABLES;
+Employee
+SQL>> DROP TABLE Employee;
+SQL>> SHOW TABLES;
+No Tables
+SQL>> 
+
+
+
+#######  Data Manipulation Language(DML)
+
+
+****************************************************************
+********** Database System I Project Console *******************
+****************************************************************
+SQL>> CREATE TABLE Departments(N string NOT NULL, C integer PRIMARY KEY);
+SQL>> ALTER TABLE Departments ADD CONSTRAINT PK_Departments PRIMARY KEY(C);
+SQL>> CREATE TABLE Students( N string NOT NULL, A integer NOT NULL, R integer  PRIMARY KEY, C integer NOT NULL);
+SQL>> ALTER TABLE Students ADD CONSTRAINT PK_Students PRIMARY KEY(R);
+SQL>> ALTER TABLE Students ADD CONSTRAINT FK_Students FOREIGN KEY (C) REFERENCES Departments(C) on DELETE CASCADE;
+SQL>> INSERT INTO Departments VALUES('DSE', '1001');
+SQL>> INSERT INTO Departments VALUES('CHE', '1002');
+SQL>> INSERT INTO Departments VALUES('CHE', '1003');
+SQL>> INSERT INTO Departments VALUES('CSE', '1004');
+SQL>> INSERT INTO Students VALUES('ayub ali', '35', '100', '1001');
+SQL>> INSERT INTO Students VALUES('tamer', '30', '110', '1004');
+SQL>> INSERT INTO Students VALUES('mikcle', '32', '105', '1001');
+SQL>> INSERT INTO Students VALUES('mike pnce', '32', '106', '1004');
+SQL>> INSERT INTO Students VALUES('Jhone Jay', '35', '107', '1001');
+SQL>> INSERT INTO Students VALUES('Hoe', '65', '108', '1004');
+SQL>> INSERT INTO Students VALUES('Woe', '25', '109', '1001');
+SQL>> INSERT INTO Students VALUES('Manny', '66', '111', '1003');
+SQL>> SELECT * FROM students;
+N	A	R	C	
+ayub ali	35	100	1001	
+Manny	66	111	1003	
+mikcle	32	105	1001	
+mike pnce	32	106	1004	
+Jhone Jay	35	107	1001	
+Hoe	65	108	1004	
+Woe	25	109	1001	
+tamer	30	110	1004	
+SQL>> SELECT * FROM Departments;
+N	C	
+CSE	1004	
+CHE	1003	
+CHE	1002	
+DSE	1001	
+SQL>> SELECT * FROM students GROUPBY(C);
+N	A	R	C	
+tamer	30	110	1004	
+Hoe	65	108	1004	
+mike pnce	32	106	1004	
+Manny	66	111	1003	
+mikcle	32	105	1001	
+ayub ali	35	100	1001	
+Woe	25	109	1001	
+Jhone Jay	35	107	1001	
+SQL>> SELECT * FROM students GROUPBY(A, C);
+N	A	R	C	
+mikcle	32	105	1001	
+tamer	30	110	1004	
+Hoe	65	108	1004	
+Woe	25	109	1001	
+Manny	66	111	1003	
+ayub ali	35	100	1001	
+Jhone Jay	35	107	1001	
+mike pnce	32	106	1004	
+SQL>> SELECT * FROM students WHERE A >= 30  and A <= 60;
+N	A	R	C	
+ayub ali	35	100	1001	
+mikcle	32	105	1001	
+mike pnce	32	106	1004	
+Jhone Jay	35	107	1001	
+tamer	30	110	1004	
+SQL>> SELECT * FROM students WHERE N == Manny;
+N	A	R	C	
+Manny	66	111	1003	
+SQL>> SELECT * FROM students WHERE A >= 30  and A <= 60 GROUPBY(A, C);
+N	A	R	C	
+mikcle	32	105	1001	
+tamer	30	110	1004	
+ayub ali	35	100	1001	
+Jhone Jay	35	107	1001	
+mike pnce	32	106	1004	
+SQL>> SELECT * FROM students WHERE A >= 30  and A <= 60 GROUPBY(C);
+N	A	R	C	
+mike pnce	32	106	1004	
+tamer	30	110	1004	
+ayub ali	35	100	1001	
+mikcle	32	105	1001	
+Jhone Jay	35	107	1001	
+SQL>> (SELECT * FROM students WHERE A <= 40)  UNION (SELECT * FROM students WHERE C == 1001);
+N	A	R	C	
+ayub ali	35	100	1001	
+mikcle	32	105	1001	
+mike pnce	32	106	1004	
+Jhone Jay	35	107	1001	
+Woe	25	109	1001	
+tamer	30	110	1004	
+SQL>> (SELECT * FROM students WHERE A <= 40)  INTERSECTION (SELECT * FROM students WHERE C == 1001);
+N	A	R	C	
+ayub ali	35	100	1001	
+mikcle	32	105	1001	
+Jhone Jay	35	107	1001	
+Woe	25	109	1001	
+SQL>> (SELECT * FROM students WHERE A <= 40)  DIFFERENCE (SELECT * FROM students WHERE C == 1001);
+N	A	R	C	
+mike pnce	32	106	1004	
+tamer	30	110	1004	
+SQL>> SELECT * FROM Students NATURALJOIN Departments;
+Students.N	Students.A	Students.R	Students.C	Departments.N	Departments.C	
+mikcle	32	105	1001	DSE	1001	
+ayub ali	35	100	1001	DSE	1001	
+Manny	66	111	1003	CHE	1003	
+Woe	25	109	1001	DSE	1001	
+tamer	30	110	1004	CSE	1004	
+Hoe	65	108	1004	CSE	1004	
+Jhone Jay	35	107	1001	DSE	1001	
+mike pnce	32	106	1004	CSE	1004	
+SQL>> SELECT * FROM Students JOIN Departments ON Students.C = Departments.C;
+Students.N	Students.A	Students.R	Students.C	Departments.N	Departments.C	
+mikcle	32	105	1001	DSE	1001	
+ayub ali	35	100	1001	DSE	1001	
+Manny	66	111	1003	CHE	1003	
+Woe	25	109	1001	DSE	1001	
+tamer	30	110	1004	CSE	1004	
+Hoe	65	108	1004	CSE	1004	
+Jhone Jay	35	107	1001	DSE	1001	
+mike pnce	32	106	1004	CSE	1004	
+SQL>> SELECT * FROM Students CROSSJOIN Departments;
+Students.N	Students.A	Students.R	Students.C	Departments.N	Departments.C	
+mikcle	32	105	1001	CSE	1004	
+mikcle	32	105	1001	CHE	1003	
+mikcle	32	105	1001	CHE	1002	
+mikcle	32	105	1001	DSE	1001	
+ayub ali	35	100	1001	CSE	1004	
+ayub ali	35	100	1001	CHE	1003	
+ayub ali	35	100	1001	CHE	1002	
+ayub ali	35	100	1001	DSE	1001	
+Manny	66	111	1003	CSE	1004	
+Manny	66	111	1003	CHE	1003	
+Manny	66	111	1003	CHE	1002	
+Manny	66	111	1003	DSE	1001	
+Woe	25	109	1001	CSE	1004	
+Woe	25	109	1001	CHE	1003	
+Woe	25	109	1001	CHE	1002	
+Woe	25	109	1001	DSE	1001	
+tamer	30	110	1004	CSE	1004	
+tamer	30	110	1004	CHE	1003	
+tamer	30	110	1004	CHE	1002	
+tamer	30	110	1004	DSE	1001	
+Hoe	65	108	1004	CSE	1004	
+Hoe	65	108	1004	CHE	1003	
+Hoe	65	108	1004	CHE	1002	
+Hoe	65	108	1004	DSE	1001	
+Jhone Jay	35	107	1001	CSE	1004	
+Jhone Jay	35	107	1001	CHE	1003	
+Jhone Jay	35	107	1001	CHE	1002	
+Jhone Jay	35	107	1001	DSE	1001	
+mike pnce	32	106	1004	CSE	1004	
+mike pnce	32	106	1004	CHE	1003	
+mike pnce	32	106	1004	CHE	1002	
+mike pnce	32	106	1004	DSE	1001	
+SQL>> SELECT * FROM students WHERE A >= 30  or C = 1001;
+N	A	R	C	
+ayub ali	35	100	1001	
+Manny	66	111	1003	
+mikcle	32	105	1001	
+mike pnce	32	106	1004	
+Jhone Jay	35	107	1001	
+Hoe	65	108	1004	
+Woe	25	109	1001	
+tamer	30	110	1004	
+SQL>> SELECT * FROM students;
+N	A	R	C	
+ayub ali	35	100	1001	
+Manny	66	111	1003	
+mikcle	32	105	1001	
+mike pnce	32	106	1004	
+Jhone Jay	35	107	1001	
+Hoe	65	108	1004	
+Woe	25	109	1001	
+tamer	30	110	1004	
+SQL>> DELETE FROM students WHERE R = 111;
+SQL>> SELECT * FROM students;
+N	A	R	C	
+ayub ali	35	100	1001	
+mikcle	32	105	1001	
+mike pnce	32	106	1004	
+Jhone Jay	35	107	1001	
+Hoe	65	108	1004	
+Woe	25	109	1001	
+tamer	30	110	1004	
+SQL>> SELECT * FROM students;
+N	A	R	C	
+ayub ali	35	100	1001	
+mikcle	32	105	1001	
+mike pnce	32	106	1004	
+Jhone Jay	35	107	1001	
+Hoe	65	108	1004	
+Woe	25	109	1001	
+tamer	30	110	1004	
+SQL>> DELETE FROM Departments WHERE C = 1001;
+SQL>> SELECT * FROM students;
+N	A	R	C	
+mike pnce	32	106	1004	
+Hoe	65	108	1004	
+tamer	30	110	1004	
+SQL>>  DELETE FROM Departments;
+SQL>>  DELETE FROM students;
+SQL>> ALTER TABLE Students DROP CONSTRAINT FK_Students;
+SQL>> ALTER TABLE Students ADD CONSTRAINT  FK_Students FOREIGN KEY (C) REFERENCES Departments(C) on DELETE SET NULL;
+SQL>> INSERT INTO Departments VALUES('DSE', '1001');
+SQL>> INSERT INTO Departments VALUES('CHE', '1002');
+SQL>> INSERT INTO Departments VALUES('CHE', '1003');
+SQL>> INSERT INTO Departments VALUES('CSE', '1004');
+SQL>> INSERT INTO Students VALUES('ayub ali', '35', '100', '1001');
+SQL>> INSERT INTO Students VALUES('tamer', '30', '110', '1004');
+SQL>> INSERT INTO Students VALUES('mikcle', '32', '105', '1001');
+SQL>> INSERT INTO Students VALUES('mike pnce', '32', '106', '1004');
+SQL>> INSERT INTO Students VALUES('Jhone Jay', '35', '107', '1001');
+SQL>> INSERT INTO Students VALUES('GD', '50', '112', '1001');
+SQL>> SELECT * FROM students;
+N	A	R	C	
+ayub ali	35	100	1001	
+GD	50	112	1001	
+mikcle	32	105	1001	
+mike pnce	32	106	1004	
+Jhone Jay	35	107	1001	
+tamer	30	110	1004	
+SQL>> DELETE FROM Departments WHERE C = 1001;
+SQL>> SELECT * FROM students
+SQL>> Command string should end with semicolone(;)
+SELECT * FROM students;
+N	A	R	C	
+ayub ali	35	100	null	
+GD	50	112	null	
+mikcle	32	105	null	
+mike pnce	32	106	1004	
+Jhone Jay	35	107	null	
+tamer	30	110	1004	
+SQL>>

@@ -128,7 +128,7 @@ public class Table {
 		// remove from columns
 		Column removedColumn = columns.remove(column);
 		if (removedColumn == null) {
-			throw new Exception(String.format("Column[%s] is found ", column));
+			throw new Exception(String.format("Column[%s] is not found ", column));
 		}
 
 		// remove all constraints
