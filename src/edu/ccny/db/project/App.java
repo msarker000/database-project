@@ -1,5 +1,8 @@
 package edu.ccny.db.project;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Set;
 
@@ -30,7 +33,6 @@ public class App {
 				
 				inputProcessor.createTable(cmd);
 			}
-			
 			else if (cmd.startsWith("ALTER TABLE")) {
 				/**
 				  1. ALTER TABLE Student ADD CONSTRAINT PK_Student PRIMARY KEY(R);
@@ -43,9 +45,10 @@ public class App {
 				  8. Alter TABLE Students DROP FD (C->A, D->B);
 				  */
 				inputProcessor.alterTable(cmd);
-			}
-			
-			else if (cmd.startsWith("DROP TABLE")) {
+			}else if (cmd.startsWith("INSERT INTO")) {
+				//insert into table
+				inputProcessor.insertIntoTable(cmd);
+			}else if (cmd.startsWith("DROP TABLE")) {
 				//DROP TABLE Students
 				inputProcessor.dropTable(cmd);
 			}
@@ -66,8 +69,7 @@ public class App {
 				 2. (SELECT * FROM students WHERE A <= 40)  INTERSECTION (SELECT * FROM students WHERE C == 1001);
 				 3. (SELECT * FROM students WHERE A <= 40)  DIFFERENCE (SELECT * FROM students WHERE C == 1001);
 				 */
-				Set<Tuple> tuples = inputProcessor.selectSetQueryTable(cmd);
-				dbService.printTuples(tuples);
+				inputProcessor.executeSetOperation(cmd);
 			}
 			else if(cmd.startsWith("SELECT *") && (cmd.toUpperCase().contains("NATURALJOIN")|| 
 					cmd.toUpperCase().contains("CROSSJOIN") ||cmd.toUpperCase().contains("JOIN")) ){
@@ -76,8 +78,7 @@ public class App {
 				 2. SELECT * FROM table1 CROSSJOIN table2
 				 3. SELECT * FROM table1 JOIN table2 ON table1.A = table2.C
 				 */
-				Set<JoinTuple> joinTuples = inputProcessor.selectJoinTable(cmd);
-				dbService.printJoinTuples(joinTuples);
+			    inputProcessor.executeJoinStatements(cmd);
 			}
 			else if (cmd.startsWith("SELECT *")) {
 				/**
@@ -89,21 +90,51 @@ public class App {
 				  6. SELECT * FROM students WHERE A >= 30 AND A <= 60" GROUPBY(A, C);
 				  7. SELECT * FROM students WHERE A >= 30 or A <= 60" GROUPBY(A, C);
 				 */
-				List<Tuple> tuples = inputProcessor.selectFromTable(cmd);
-				dbService.printTuples(tuples);
-			}else if (cmd.toUpperCase().startsWith("QUIT")) {
-				System.exit(0);
-			}	
+				inputProcessor.executeSelectStatement(cmd);
+				
+			}else if(cmd.toUpperCase().startsWith("DESCRIBE TABLE")){
+				inputProcessor.describeTable(cmd);
+			}else if(cmd.toUpperCase().startsWith("FIND NF FOR")){
+				inputProcessor.findNormalFromString(cmd);
+			}else if(cmd.toUpperCase().startsWith("FIND KEY FOR")){
+				inputProcessor.findFindKeysForTable(cmd);
+			}
+			else{
+				System.err.println("Failed to process your SQL. Please check your command string");	
+			}
+				
 		} catch (Exception ex) {
-			System.err.println("Failed to process your command string. Please check your command string");
+			System.err.println(String.format("Failed to process your command string. error: %s", ex.getMessage()));
 			return;
 		}
 	}
 	
+	private static String getUserInput(BufferedReader reader) throws IOException {
+		String userInput = "";
+		do {
+			userInput = reader.readLine();
+			if (!userInput.isEmpty() && userInput.equalsIgnoreCase("quit")) {
+				System.out.println("You entered QUIT to exit the application");
+				System.exit(0);
+			}
+		} while (userInput.isEmpty());
+
+		return userInput;
+	}
+
 	
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
 		System.out.println("****************************************************************");
-		System.out.println("********** Database System I Project Console ******************");
+		System.out.println("********** Database System I Project Console *******************");
 		System.out.println("****************************************************************");
+		App app = new  App();
+		BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+	
+		while(true){
+			System.out.print("SQL>> ");
+			String cmd = getUserInput(reader);
+			app.processCommand(cmd);
+		}
+		
 	}
 }

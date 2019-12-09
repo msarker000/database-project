@@ -67,14 +67,30 @@ public class InputProcessor {
 		}
 	}
 	
+	public void describeTable(String describeStr) {
+		// DESCIRBE TABLE Students
+		if(describeStr.toUpperCase().contains("DESCRIBE TABLE")){
+			String[] strs = describeStr.split(" "); 
+			String tableName = strs[2];
+			Table table = dbService.getTable(tableName);
+			if(table == null){
+				System.err.println(String.format("[%s] not found", tableName));
+				return;
+			}
+			String desStr = table.describeTable();
+			System.out.println(desStr);
+		}
+	}
+	
 
 	public void alterTable(String alterTablestr) throws Exception {
 		String tableName = findTableNameFromAlterTableStr(alterTablestr);
 		Table table = dbService.getTable(tableName);
 		if (table == null) {
-			throw new Exception("Table name is not found in database. Please check your query");
+			throw new Exception(String.format("[%s] is not found in database.", tableName));
 		}
 		alterTablestr = alterTablestr.toUpperCase();
+		
 		if (alterTablestr.contains(ADD_CONSTRAIN)) {
 			// add constraint to table
 			addConstraintToTable(alterTablestr, table);
@@ -104,7 +120,7 @@ public class InputProcessor {
 	 * @return
 	 * @throws Exception
 	 */
-	public Set<String> findFindKeysForTable(String findString) throws Exception {
+	public void findFindKeysForTable(String findString) throws Exception {
 		Set<String> keys = new LinkedHashSet<>();
 		if (findString.toUpperCase().contains(FIND_KEY)) {
 			String[] strs = findString.split(" ");
@@ -115,7 +131,14 @@ public class InputProcessor {
 				keys.add(SetUtil.setToString(key));
 			}
 		}
-		return null;
+		for(String key : keys){
+			System.out.println("\t "+key);
+		}
+	}
+	
+	public void findNormalFromString(String findString) {
+		NormalForm normalForm =findNormalFromForTable(findString);
+		System.out.println(normalForm);
 	}
 
 	/**
@@ -247,7 +270,7 @@ public class InputProcessor {
 			} else if (table.getPrimaryKeyName().equalsIgnoreCase(constaintName)) {
 				table.removePrimaryKey();
 			} else {
-				throw new Exception("Failed to remove constrains. check constraint name");
+				throw new Exception("Failed to remove constrains.");
 			}
 		}
 	}
@@ -305,11 +328,11 @@ public class InputProcessor {
 		String tableName = findTableNameFromInsertTableStr(insertString);
 		Table table = dbService.getTable(tableName);
 		if (table == null) {
-			throw new Exception("Table name is not found in database. Please check your query");
+			throw new Exception(String.format("[%s] is not found in database.", tableName));
 		}
 
 		if (!insertString.toUpperCase().contains("VALUES")) {
-			throw new Exception("Invalid Insert String please check your input");
+			throw new Exception("Invalid Insert String.");
 		}
 
 		insertString = insertString.substring(insertString.indexOf("VALUES")).trim();
@@ -328,6 +351,12 @@ public class InputProcessor {
 		table.insert(valuesToInsert);
 	}
 
+	public void executeSelectStatement(String slectStr){
+		List<Tuple> tuples = selectFromTable(slectStr);
+		dbService.printTuples(tuples);
+	}
+	
+	
 	/**
 	 * select from table
 	 * 
@@ -417,6 +446,11 @@ public class InputProcessor {
 		}
 
 	}
+	
+	public void executeSetOperation(String setOpcmd){
+		Set<Tuple> tuples = selectSetQueryTable(setOpcmd);
+		dbService.printTuples(tuples);
+	}
 
 	// ( SELECT * FROM students WHERE A <= 40 ) UNION ( SELECT * FROM students
 	// WHERE C == 1001 )
@@ -437,6 +471,10 @@ public class InputProcessor {
 		}
 
 		return new HashSet<>();
+	}
+	public void executeJoinStatements(String joinQuery) {
+		Set<JoinTuple> joinTuples = selectJoinTable(joinQuery);
+		dbService.printJoinTuples(joinTuples);
 	}
 
 	public Set<JoinTuple> selectJoinTable(String joinQuery) {

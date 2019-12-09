@@ -6,10 +6,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
-import edu.ccny.db.assignment.SetUtil;
 
 public class DBOperator implements DBService {
 
@@ -37,6 +35,10 @@ public class DBOperator implements DBService {
 	
 	@Override
 	public void showTableList() {
+		if(tables.isEmpty()){
+			System.out.println("No Tables");
+			return;
+		}
 		for(Table table: tables.values()){
 			System.out.println(table.getName());
 		}

@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import edu.ccny.db.assignment.FunctionDependency;
 
 /**
  * This class present table in with all kind if operation insert, update, delete
