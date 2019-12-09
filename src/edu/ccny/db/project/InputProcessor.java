@@ -596,27 +596,31 @@ public class InputProcessor {
 	private boolean isValidFD(Table table, Set<Character> lhsOfFD, Set<Character> rhsOfFD) {
 
 		if (SetUtil.isSubset(lhsOfFD, rhsOfFD)) {
-			System.err.println("\nWrong FD[RHS of FD is subset of LHS].");
+			System.err.println(String.format("\nWrong FD[RHS[%s] of FD is subset of LHS[%s]].", getString(lhsOfFD), getString(rhsOfFD)));
 			return false;
 		}
 
 		if (!table.getAttributes().containsAll(lhsOfFD)) {
-			System.err.println("\n Wrong FD[LHS contains attributes not in Relation].");
+			System.err.println(String.format("\n Wrong FD[LHS[%s] contains attributes not in Relation].",getString(lhsOfFD)));
 			return false;
 
 		}
 
 		if (!table.getAttributes().containsAll(rhsOfFD)) {
-			System.err.println("\n Wrong FD[RHS contains attributes not in Relation].");
+			System.err.println(String.format("\n Wrong FD[RHS[%s] contains attributes not in Relation].", getString(rhsOfFD)));
 			return false;
 		}
 
 		if (table.isExistFD(lhsOfFD, rhsOfFD)) {
-			System.err.println("\n  Wrong FD[Redundant FD. Same FD exist in Relation]");
+			System.err.println("\n  Wrong FD[Redundant FD. Same FD exist in Relation]"+ getString(lhsOfFD) +" -> "+ getString(lhsOfFD));
 			return false;
 		}
 
 		return true;
+	}
+	
+	public String getString(Set<Character> characters){
+		return characters.stream().map(c -> String.valueOf(c)).collect(Collectors.joining());
 	}
 
 }
